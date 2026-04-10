@@ -143,16 +143,16 @@ async function loadBootData() {
             let resizeFrame = null;
             let franceReferenceTotalStations = null;
             const timeframeOptions = [
-                { step: "0", value: "all", label: "All history" },
-                { step: "1", value: "90", label: "Last 90 days" },
-                { step: "2", value: "30", label: "Last 30 days" },
-                { step: "3", value: "7", label: "Last 7 days" }
+                { step: "0", value: "7", label: "Last 7 days" },
+                { step: "1", value: "3", label: "Last 3 days" },
+                { step: "2", value: "90", label: "Last 90 days" },
+                { step: "3", value: "all", label: "All" }
             ];
             const stationFuelPriority = ["SP98", "Gazole", "SP95", "E10", "E85", "GPLc", "Unknown"];
             const initialQuery = new URLSearchParams(window.location.search);
             if (timeframeEl && initialQuery.has("timeframe")) {
                 const matchedTimeframe = timeframeOptions.find((option) => option.value === (initialQuery.get("timeframe") || "all"));
-                timeframeEl.value = matchedTimeframe?.step || "0";
+                timeframeEl.value = matchedTimeframe?.step || "3";
             }
 
             function isPhoneViewport() {
@@ -305,7 +305,7 @@ async function loadBootData() {
             }
 
             function getSelectedTimeframeLabel() {
-                return timeframeOptions.find((option) => option.value === getSelectedTimeframeValue())?.label || "All history";
+                return timeframeOptions.find((option) => option.value === getSelectedTimeframeValue())?.label || "All";
             }
 
             function formatDateRangeLabel(startDate, endDate) {

@@ -305,6 +305,19 @@ h2 {
     font-size: 0.88rem;
 }
 
+.control-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.control-meta {
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: right;
+}
+
 .control select {
     appearance: none;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -321,8 +334,8 @@ h2 {
 
 .timeframe-slider-shell {
     display: grid;
-    gap: 10px;
-    padding: 12px 14px;
+    gap: 8px;
+    padding: 10px 14px;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.05);
@@ -330,7 +343,7 @@ h2 {
 
 .timeframe-slider-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 12px;
     align-items: baseline;
 }
@@ -338,11 +351,6 @@ h2 {
 .timeframe-slider-header strong {
     font-family: "Space Grotesk", sans-serif;
     font-size: 1rem;
-}
-
-.timeframe-slider-header span {
-    color: var(--muted);
-    font-size: 0.82rem;
 }
 
 #fuelwise-global-timeframe-filter {
@@ -972,9 +980,10 @@ th {
         padding: 11px 12px;
     }
 
-    .timeframe-slider-header {
-        align-items: flex-start;
+    .control-heading {
         flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 
     .station-search-control input,
