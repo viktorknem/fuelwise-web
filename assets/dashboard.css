@@ -183,11 +183,7 @@ h2 {
 }
 
 .dashboard-grid {
-    grid-template-columns: 0.85fr 1.15fr;
-}
-
-.bottom-grid {
-    grid-template-columns: 0.8fr 1.2fr;
+    grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
 }
 
 .detail-grid {
@@ -218,6 +214,7 @@ h2 {
     position: sticky;
     top: 12px;
     z-index: 10;
+    background: linear-gradient(180deg, rgba(10, 23, 38, 0.97), rgba(10, 23, 38, 0.88));
 }
 
 .filter-badges,
@@ -226,6 +223,11 @@ h2 {
     flex-wrap: wrap;
     gap: 12px;
     align-items: end;
+}
+
+.filter-badges {
+    flex: 1 1 100%;
+    margin-top: -2px;
 }
 
 .filter-badge,
@@ -643,23 +645,6 @@ h2 {
     overflow-x: auto;
 }
 
-.department-status-panel {
-    min-width: 0;
-}
-
-.department-table-shell {
-    max-height: 420px;
-    overflow-y: auto;
-    padding-right: 6px;
-}
-
-.department-table-shell thead th {
-    position: sticky;
-    top: 0;
-    background: rgba(10, 23, 38, 0.96);
-    z-index: 1;
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
@@ -695,54 +680,6 @@ th {
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.department-row {
-    cursor: pointer;
-    transition: background 160ms ease, transform 160ms ease;
-}
-
-.department-row:hover,
-.department-row:focus-visible,
-.department-row.is-active {
-    background: rgba(244, 127, 61, 0.08);
-}
-
-.station-item {
-    cursor: pointer;
-    transition: background 160ms ease, transform 160ms ease;
-    border-radius: 16px;
-    padding: 14px 12px;
-    margin: 0 -12px;
-}
-
-.station-item:hover,
-.station-item:focus-visible,
-.station-item.is-active {
-    background: rgba(244, 127, 61, 0.1);
-}
-
-.chip-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.department-chip {
-    appearance: none;
-    cursor: pointer;
-    color: inherit;
-    font: inherit;
-}
-
-.department-chip.is-active {
-    outline: 2px solid rgba(255, 178, 74, 0.42);
-    outline-offset: 1px;
-}
-
-.station-list {
-    display: grid;
-    gap: 12px;
-}
-
 .bar-chart {
     display: grid;
     gap: 14px;
@@ -753,6 +690,19 @@ th {
     grid-template-columns: minmax(110px, 0.9fr) 1.8fr auto;
     gap: 12px;
     align-items: center;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.bar-row:hover,
+.bar-row:focus-visible,
+.bar-row.is-active {
+    background: rgba(244, 127, 61, 0.08);
+    border-color: rgba(255, 178, 74, 0.18);
 }
 
 .bar-label,
@@ -785,16 +735,45 @@ th {
     background: linear-gradient(90deg, rgba(255, 178, 74, 0.88), rgba(255, 178, 74, 0.45));
 }
 
-.station-row {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 14px;
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+.station-table-shell {
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 4px;
 }
 
-.station-item:last-child {
-    border-bottom-color: transparent;
+.station-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: rgba(10, 23, 38, 0.97);
+}
+
+.station-item {
+    cursor: pointer;
+    transition: background 160ms ease;
+}
+
+.station-item td {
+    padding: 14px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.station-item:hover td,
+.station-item:focus-visible td,
+.station-item.is-active td {
+    background: rgba(244, 127, 61, 0.08);
+}
+
+.station-primary {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.station-secondary {
+    color: var(--muted);
+    font-size: 0.86rem;
+    line-height: 1.45;
 }
 
 .chart-shell-station svg {
@@ -811,21 +790,21 @@ th {
     filter: brightness(1.08);
 }
 
-.station-row strong {
-    display: block;
-    margin-bottom: 4px;
-}
-
-.station-row p {
-    margin: 0;
-}
-
 .fuel-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-end;
-    align-self: start;
+    gap: 6px;
+    justify-content: flex-start;
+}
+
+.fuel-tags span {
+    font-size: 0.78rem;
+    padding: 6px 9px;
+}
+
+.empty-state-cell {
+    padding: 18px 12px;
+    color: var(--muted);
 }
 
 .empty-state {
@@ -1001,8 +980,7 @@ th {
         scroll-snap-align: start;
     }
 
-    .panel-header,
-    .station-row {
+    .panel-header {
         grid-template-columns: 1fr;
     }
 
@@ -1014,10 +992,6 @@ th {
     .bar-label,
     .bar-value {
         font-size: 0.88rem;
-    }
-
-    .fuel-tags {
-        justify-content: flex-start;
     }
 
     .france-map,

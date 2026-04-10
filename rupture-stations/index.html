@@ -40,6 +40,15 @@
                         <option value="">Loading departments…</option>
                     </select>
                 </label>
+                <label class="control">
+                    <span>Trend window</span>
+                    <select name="timeframe" id="fuelwise-global-timeframe-filter">
+                        <option value="all">All history</option>
+                        <option value="90">Last 90 days</option>
+                        <option value="30">Last 30 days</option>
+                        <option value="7">Last 7 days</option>
+                    </select>
+                </label>
                 <div class="filter-badges" id="fuelwise-active-filters" hidden></div>
             </form>
         </section>
@@ -48,22 +57,22 @@
             <article class="metric-card">
                 <span class="metric-label">Total stations</span>
                 <strong class="metric-value" id="fuelwise-metric-total-stations">0</strong>
-                <span class="metric-foot">Stations included in FuelWise</span>
+                <span class="metric-foot" id="fuelwise-metric-total-foot">Stations included in FuelWise</span>
             </article>
             <article class="metric-card">
                 <span class="metric-label">Stations with shortages</span>
                 <strong class="metric-value" id="fuelwise-metric-shortage-stations">0</strong>
-                <span class="metric-foot">Stations affected on the latest day shown</span>
+                <span class="metric-foot" id="fuelwise-metric-shortage-foot">Stations affected in the current snapshot</span>
             </article>
             <article class="metric-card">
                 <span class="metric-label">Affected departments</span>
                 <strong class="metric-value" id="fuelwise-metric-affected-departments">0</strong>
-                <span class="metric-foot">Departments with at least one affected station</span>
+                <span class="metric-foot" id="fuelwise-metric-affected-foot">Departments with at least one affected station</span>
             </article>
             <article class="metric-card">
                 <span class="metric-label">Fuel shortages</span>
                 <strong class="metric-value" id="fuelwise-metric-shortage-rows">0</strong>
-                <span class="metric-foot">Affected fuel entries on the latest day shown</span>
+                <span class="metric-foot" id="fuelwise-metric-rows-foot">Fuel shortage entries in the current snapshot</span>
             </article>
         </section>
 
@@ -71,19 +80,23 @@
             <div class="panel-header">
                 <div>
                     <p class="eyebrow">Trend</p>
-                    <h2>Stations with shortages over time</h2>
+                    <h2>Short-term shortage trend</h2>
                 </div>
-                <p class="panel-note">Use the filters to see one fuel type or all fuel types together.</p>
+                <p class="panel-note">Track how shortage pressure is moving, then compare today with yesterday and the last month.</p>
             </div>
             <div class="chart-controls">
                 <div class="chart-legend" id="fuelwise-chart-legend" aria-label="Fuel lines"></div>
                 <div class="chart-stat">
-                    <span class="chart-stat-label">Latest value</span>
+                    <span class="chart-stat-label">Shortage today</span>
                     <strong id="fuelwise-chart-value">0</strong>
                 </div>
                 <div class="chart-stat">
-                    <span class="chart-stat-label">Change over period</span>
+                    <span class="chart-stat-label">Change vs yesterday</span>
                     <strong id="fuelwise-chart-change">0%</strong>
+                </div>
+                <div class="chart-stat">
+                    <span class="chart-stat-label">Change vs last month</span>
+                    <strong id="fuelwise-chart-month-change">0%</strong>
                 </div>
             </div>
             <div class="chart-shell">
@@ -101,21 +114,21 @@
                 </div>
                 <p class="panel-note">Prices often rise when shortages spread. Use the filters to compare France with one department.</p>
             </div>
-            <div class="chart-controls">
-                <div class="chart-legend" id="fuelwise-price-chart-legend" aria-label="Price fuel lines"></div>
-                <div class="chart-stat">
-                    <span class="chart-stat-label">Latest average</span>
-                    <strong id="fuelwise-price-value">-</strong>
+                <div class="chart-controls">
+                    <div class="chart-legend" id="fuelwise-price-chart-legend" aria-label="Price fuel lines"></div>
+                    <div class="chart-stat">
+                        <span class="chart-stat-label">Latest average</span>
+                        <strong id="fuelwise-price-value">-</strong>
                 </div>
                 <div class="chart-stat">
                     <span class="chart-stat-label">Latest day change</span>
                     <strong id="fuelwise-price-change">-</strong>
                 </div>
-                <div class="chart-stat">
-                    <span class="chart-stat-label">Change over period</span>
-                    <strong id="fuelwise-price-period-change">-</strong>
+                    <div class="chart-stat">
+                        <span class="chart-stat-label">Change vs last month</span>
+                        <strong id="fuelwise-price-period-change">-</strong>
+                    </div>
                 </div>
-            </div>
             <div class="chart-shell chart-shell-price">
                 <svg id="fuelwise-price-chart" viewBox="0 0 960 320" preserveAspectRatio="none" role="img" aria-label="Chart showing average fuel price over time"></svg>
                 <div class="chart-empty" id="fuelwise-price-chart-empty" hidden>No price data is available for this selection yet.</div>
@@ -141,45 +154,6 @@
                         <span><i class="legend-dot legend-stable"></i> 0% to 12% affected</span>
                         <span><i class="legend-dot legend-muted"></i> No active shortage signal</span>
                     </div>
-                </div>
-            </article>
-
-            <article class="panel department-status-panel">
-                <div class="panel-header">
-                    <div>
-                        <p class="eyebrow">By department</p>
-                        <h2>Department status</h2>
-                    </div>
-                    <p class="panel-note">Sorted by the areas with the most pressure.</p>
-                </div>
-                <div class="table-shell department-table-shell">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Department</th>
-                                <th>Status</th>
-                                <th>Stations</th>
-                                <th>Shortages</th>
-                            </tr>
-                        </thead>
-                        <tbody id="fuelwise-departments-body">
-                            <tr><td colspan="4">Loading department summary…</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </article>
-        </section>
-
-        <section class="dashboard-grid bottom-grid">
-            <article class="panel">
-                <div class="panel-header">
-                    <div>
-                        <p class="eyebrow">Focus areas</p>
-                        <h2>Departments to watch</h2>
-                    </div>
-                </div>
-                <div class="chip-list" id="fuelwise-chip-list">
-                    <span class="area-chip">Loading areas…</span>
                 </div>
             </article>
 
@@ -213,8 +187,19 @@
                     </label>
                     <button type="button" class="ghost-button" id="fuelwise-clear-station-search">Clear search</button>
                 </div>
-                <div class="station-list" id="fuelwise-station-detail-list">
-                    <p class="empty-state">Loading station detail…</p>
+                <div class="table-shell station-table-shell">
+                    <table class="station-table">
+                        <thead>
+                            <tr>
+                                <th>Station</th>
+                                <th>Location</th>
+                                <th>Affected fuels</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fuelwise-station-detail-list">
+                            <tr><td colspan="3" class="empty-state-cell">Loading station detail…</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </article>
 
@@ -233,7 +218,7 @@
                         <strong id="fuelwise-station-chart-value">0</strong>
                     </div>
                     <div class="chart-stat">
-                        <span class="chart-stat-label">30-day total</span>
+                        <span class="chart-stat-label">Window total</span>
                         <strong id="fuelwise-station-chart-total">0</strong>
                     </div>
                 </div>

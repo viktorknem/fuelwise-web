@@ -53,6 +53,7 @@ async function loadBootData() {
             const formEl = document.getElementById("fuelwise-global-filter-form");
             const fuelEl = document.getElementById("fuelwise-global-fuel-filter");
             const departmentEl = document.getElementById("fuelwise-global-department-filter");
+            const timeframeEl = document.getElementById("fuelwise-global-timeframe-filter");
             const activeFiltersEl = document.getElementById("fuelwise-active-filters");
             const stationSearchEl = document.getElementById("fuelwise-station-search");
             const clearStationSearchEl = document.getElementById("fuelwise-clear-station-search");
@@ -62,9 +63,13 @@ async function loadBootData() {
             const dbStatusEl = document.getElementById("fuelwise-db-status");
             const generatedAtEl = document.getElementById("fuelwise-generated-at");
             const totalStationsEl = document.getElementById("fuelwise-metric-total-stations");
+            const totalStationsFootEl = document.getElementById("fuelwise-metric-total-foot");
             const shortageStationsEl = document.getElementById("fuelwise-metric-shortage-stations");
+            const shortageStationsFootEl = document.getElementById("fuelwise-metric-shortage-foot");
             const affectedDepartmentsEl = document.getElementById("fuelwise-metric-affected-departments");
+            const affectedDepartmentsFootEl = document.getElementById("fuelwise-metric-affected-foot");
             const shortageRowsEl = document.getElementById("fuelwise-metric-shortage-rows");
+            const shortageRowsFootEl = document.getElementById("fuelwise-metric-rows-foot");
             const departmentsBodyEl = document.getElementById("fuelwise-departments-body");
             const chipListEl = document.getElementById("fuelwise-chip-list");
             const barChartEl = document.getElementById("fuelwise-bar-chart");
@@ -86,6 +91,7 @@ async function loadBootData() {
             const shortageLegendEl = document.getElementById("fuelwise-chart-legend");
             const shortageValueEl = document.getElementById("fuelwise-chart-value");
             const shortageChangeEl = document.getElementById("fuelwise-chart-change");
+            const shortageMonthChangeEl = document.getElementById("fuelwise-chart-month-change");
 
             const priceChartEl = document.getElementById("fuelwise-price-chart");
             const priceEmptyEl = document.getElementById("fuelwise-price-chart-empty");
@@ -133,6 +139,11 @@ async function loadBootData() {
             let pendingStationSelection = null;
             let currentStationTrendPayload = null;
             let resizeFrame = null;
+            let franceReferenceTotalStations = null;
+            const initialQuery = new URLSearchParams(window.location.search);
+            if (timeframeEl && initialQuery.has("timeframe")) {
+                timeframeEl.value = initialQuery.get("timeframe") || "all";
+            }
 
             function isPhoneViewport() {
                 return window.matchMedia("(max-width: 640px)").matches;
@@ -233,11 +244,28 @@ async function loadBootData() {
             }
 
             function formatInteger(value) {
-                return `${Math.round(Number(value || 0))}`;
+                return Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
             }
 
             function formatPercent(value) {
                 return `${Number(value || 0).toFixed(1)}%`;
+            }
+
+            function formatSignedPercent(value) {
+                const numeric = Number(value || 0);
+                const prefix = numeric > 0 ? "+" : "";
+                return `${prefix}${numeric.toFixed(1)}%`;
+            }
+
+            function formatDeltaLabel(current, previous) {
+                if (previous === null || previous === undefined) {
+                    return "Not enough history";
+                }
+                const delta = Number(current || 0) - Number(previous || 0);
+                if (Math.abs(delta) < 0.05) {
+                    return "Flat";
+                }
+                return `${delta > 0 ? "Up" : "Down"} ${Math.abs(delta).toFixed(1)} pts`;
             }
 
             function displayFuelName(value) {
@@ -254,6 +282,37 @@ async function loadBootData() {
 
             function normalizeDepartmentCode(value) {
                 return String(value || "").trim().toUpperCase();
+            }
+
+            function getSelectedTimeframeDays() {
+                const rawValue = String(timeframeEl?.value || "all");
+                return rawValue === "all" ? null : Math.max(1, Number(rawValue) || 30);
+            }
+
+            function getSelectedTimeframeLabel() {
+                const days = getSelectedTimeframeDays();
+                if (!days) {
+                    return "All history";
+                }
+                return `Last ${days} days`;
+            }
+
+            function sliceSeriesWindow(points, days) {
+                if (!Array.isArray(points)) {
+                    return [];
+                }
+                if (!days || points.length <= days) {
+                    return points;
+                }
+                return points.slice(-days);
+            }
+
+            function pointDaysAgo(points, daysAgo) {
+                if (!Array.isArray(points) || !points.length) {
+                    return null;
+                }
+                const index = Math.max(0, points.length - 1 - daysAgo);
+                return points[index] || points[0] || null;
             }
 
             function renderActiveFilters(payload) {
@@ -277,6 +336,13 @@ async function loadBootData() {
                         label: `Department: ${payload?.scope?.department_name || selectedDepartment}`
                     });
                 }
+                if (getSelectedTimeframeDays()) {
+                    badges.push({
+                        kind: "timeframe",
+                        value: String(getSelectedTimeframeDays()),
+                        label: `Trend window: ${getSelectedTimeframeLabel()}`
+                    });
+                }
                 activeFiltersEl.hidden = !badges.length;
                 activeFiltersEl.innerHTML = badges.map((badge) => `
                     <button type="button" class="filter-badge" data-filter-kind="${escapeHtml(badge.kind)}" data-filter-value="${escapeHtml(badge.value)}">
@@ -289,18 +355,15 @@ async function loadBootData() {
             function scopeText(payload) {
                 const scope = payload?.scope || {};
                 if (scope.fuel_type === "all" && !scope.department_code) {
-                    return fuelwiseCopy.hero_scope_all;
+                    return "All main fuels across France";
                 }
                 if (scope.fuel_type !== "all" && !scope.department_code) {
-                    return replaceTokens(fuelwiseCopy.hero_scope_fuel_france, { fuel: displayFuelName(scope.fuel_type) });
+                    return `${displayFuelName(scope.fuel_type)} across France`;
                 }
                 if (scope.fuel_type === "all" && scope.department_code) {
-                    return replaceTokens(fuelwiseCopy.hero_scope_all_department, { department: scope.department_name });
+                    return `All main fuels in ${scope.department_name}`;
                 }
-                return replaceTokens(fuelwiseCopy.hero_scope_fuel_department, {
-                    fuel: displayFuelName(scope.fuel_type),
-                    department: scope.department_name
-                });
+                return `${displayFuelName(scope.fuel_type)} in ${scope.department_name}`;
             }
 
             function renderHero(payload) {
@@ -308,7 +371,7 @@ async function loadBootData() {
                     heroScopeEl.textContent = scopeText(payload);
                 }
                 if (heroSummaryEl) {
-                    heroSummaryEl.textContent = replaceTokens(fuelwiseCopy.hero_summary, { date: payload.latest_snapshot_date || "" });
+                    heroSummaryEl.textContent = "Monitor fuel shortages across France, compare departments quickly, and drill into the stations that need attention.";
                 }
                 if (sourcePillEl) {
                     sourcePillEl.className = `pill pill-${payload.data_mode || "live"}`;
@@ -323,17 +386,48 @@ async function loadBootData() {
             }
 
             function renderMetrics(payload) {
+                const scopeName = payload?.scope?.department_name || "France";
+                const totalStations = Number(payload.summary?.total_stations || 0);
+                const shortageStations = Number(payload.summary?.stations_with_rupture || 0);
+                const affectedDepartments = Number(payload.summary?.affected_departments || 0);
+                const shortageRows = Number(payload.summary?.rupture_rows || 0);
+                const isDepartmentScope = Boolean(payload?.scope?.department_code);
                 if (totalStationsEl) {
-                    totalStationsEl.textContent = formatInteger(payload.summary?.total_stations);
+                    totalStationsEl.textContent = formatInteger(totalStations);
                 }
                 if (shortageStationsEl) {
-                    shortageStationsEl.textContent = formatInteger(payload.summary?.stations_with_rupture);
+                    shortageStationsEl.textContent = formatInteger(shortageStations);
                 }
                 if (affectedDepartmentsEl) {
-                    affectedDepartmentsEl.textContent = formatInteger(payload.summary?.affected_departments);
+                    affectedDepartmentsEl.textContent = formatInteger(affectedDepartments);
                 }
                 if (shortageRowsEl) {
-                    shortageRowsEl.textContent = formatInteger(payload.summary?.rupture_rows);
+                    shortageRowsEl.textContent = formatInteger(shortageRows);
+                }
+                if (!franceReferenceTotalStations && !isDepartmentScope) {
+                    franceReferenceTotalStations = totalStations;
+                }
+                if (totalStationsFootEl) {
+                    if (isDepartmentScope && franceReferenceTotalStations) {
+                        totalStationsFootEl.textContent = `${formatPercent((totalStations / franceReferenceTotalStations) * 100)} of French stations are in ${scopeName}.`;
+                    } else {
+                        totalStationsFootEl.textContent = "Stations covered by the current dashboard scope.";
+                    }
+                }
+                if (shortageStationsFootEl) {
+                    shortageStationsFootEl.textContent = isDepartmentScope
+                        ? `${formatPercent(totalStations ? (shortageStations / totalStations) * 100 : 0)} of stations in ${scopeName} are affected right now.`
+                        : `${formatPercent(totalStations ? (shortageStations / totalStations) * 100 : 0)} of tracked stations are affected right now.`;
+                }
+                if (affectedDepartmentsFootEl) {
+                    affectedDepartmentsFootEl.textContent = isDepartmentScope
+                        ? `Current focus is ${scopeName}. Clear the department filter to compare the national spread.`
+                        : "Departments with at least one station currently affected.";
+                }
+                if (shortageRowsFootEl) {
+                    shortageRowsFootEl.textContent = isDepartmentScope
+                        ? `Fuel shortage entries recorded in ${scopeName} in the latest snapshot.`
+                        : "Fuel shortage entries recorded across France in the latest snapshot.";
                 }
             }
 
@@ -410,13 +504,17 @@ async function loadBootData() {
                     return;
                 }
                 barChartEl.innerHTML = items.map((item) => `
-                    <div class="bar-row">
+                    <button
+                        type="button"
+                        class="bar-row"
+                        data-department-name="${escapeHtml(item.label || "")}"
+                    >
                         <div class="bar-label">${escapeHtml(item.label || "")}</div>
                         <div class="bar-track">
                             <span class="bar-fill bar-fill-${escapeHtml(item.status_level || "stable")}" style="width: ${Number(item.width || 0)}%;"></span>
                         </div>
-                        <div class="bar-value">${escapeHtml(`${item.value || 0} · ${Number(item.percentage || 0).toFixed(1)}%`)}</div>
-                    </div>
+                        <div class="bar-value">${escapeHtml(`${formatInteger(item.value || 0)} · ${Number(item.percentage || 0).toFixed(1)}%`)}</div>
+                    </button>
                 `).join("");
             }
 
@@ -435,22 +533,27 @@ async function loadBootData() {
                     return;
                 }
                 if (!visibleStations.length) {
-                    detailListEl.innerHTML = `<p class="empty-state">${escapeHtml(stationSearchTerm ? "No stations match this search in the current scope." : fuelwiseCopy.detail.empty)}</p>`;
+                    detailListEl.innerHTML = `<tr><td colspan="3" class="empty-state-cell">${escapeHtml(stationSearchTerm ? "No stations match this search in the current scope." : fuelwiseCopy.detail.empty)}</td></tr>`;
                     return;
                 }
                 detailListEl.innerHTML = visibleStations.map((station) => {
                     const location = [station.city || "", station.address || ""].filter(Boolean).join(" · ");
                     const fuels = Array.from(new Set((Array.isArray(station.fuel_list) ? station.fuel_list : []).map((fuel) => displayFuelName(fuel))));
                     return `
-                        <div class="station-row station-item" data-station-id="${escapeHtml(station.station_id || "")}" data-station-name="${escapeHtml(station.name || fuelwiseCopy.common_station)}" tabindex="0" role="button">
-                            <div>
-                                <strong>${escapeHtml(station.name || fuelwiseCopy.common_station)}</strong>
-                                <p>${escapeHtml(location || fuelwiseCopy.detail.location_unavailable)}</p>
-                            </div>
-                            <div class="fuel-tags">
-                                ${fuels.map((fuel) => `<span>${escapeHtml(fuel)}</span>`).join("")}
-                            </div>
-                        </div>
+                        <tr class="station-item" data-station-id="${escapeHtml(station.station_id || "")}" data-station-name="${escapeHtml(station.name || fuelwiseCopy.common_station)}" tabindex="0" role="button">
+                            <td>
+                                <strong class="station-primary">${escapeHtml(station.name || fuelwiseCopy.common_station)}</strong>
+                                <span class="station-secondary">${escapeHtml(station.department_name || "")}</span>
+                            </td>
+                            <td>
+                                <span class="station-secondary">${escapeHtml(location || fuelwiseCopy.detail.location_unavailable)}</span>
+                            </td>
+                            <td>
+                                <div class="fuel-tags">
+                                    ${fuels.map((fuel) => `<span>${escapeHtml(fuel)}</span>`).join("")}
+                                </div>
+                            </td>
+                        </tr>
                     `;
                 }).join("");
                 setActiveStation(selectedStationId);
@@ -542,7 +645,7 @@ async function loadBootData() {
                     stationChartTitleEl.textContent = shortageify(fuelwiseCopy.station_chart.title);
                 }
                 if (stationChartNoteEl) {
-                    stationChartNoteEl.textContent = shortageify(fuelwiseCopy.station_chart.note);
+                    stationChartNoteEl.textContent = `Select a station to see a ${getSelectedTimeframeLabel().toLowerCase()} stacked breakdown by fuel shortage.`;
                 }
                 if (stationChartValueEl) {
                     stationChartValueEl.textContent = "0";
@@ -670,6 +773,7 @@ async function loadBootData() {
                     return;
                 }
                 const chartConfig = getChartConfig("shortage");
+                const timeframeDays = getSelectedTimeframeDays();
                 const shortageChartWidth = chartConfig.width;
                 const shortageChartHeight = chartConfig.height;
                 const shortagePadding = chartConfig.padding;
@@ -681,15 +785,16 @@ async function loadBootData() {
                     ? (fuelwisePayload.time_series?.fuel_types || [])
                     : [normalizedSelectedFuelType]
                 ).filter((fuelType) => fuelType !== "SP95" && Array.isArray(allSeries[fuelType]) && allSeries[fuelType].length);
-                const visibleSeries = visibleFuelTypes.map((fuelType) => [fuelType, allSeries[fuelType]]);
+                const visibleSeries = visibleFuelTypes.map((fuelType) => [fuelType, sliceSeriesWindow(allSeries[fuelType], timeframeDays)]);
                 const summarySeries = (
                     normalizedSelectedFuelType === "all"
-                        ? (Array.isArray(allSeries.all) && allSeries.all.length ? allSeries.all : visibleSeries[0]?.[1])
+                        ? (Array.isArray(allSeries.all) && allSeries.all.length ? sliceSeriesWindow(allSeries.all, timeframeDays) : visibleSeries[0]?.[1])
                         : (allSeries[normalizedSelectedFuelType] || visibleSeries[0]?.[1])
-                ) || [];
+                );
+                const effectiveSummarySeries = sliceSeriesWindow(summarySeries || [], timeframeDays);
                 const totalStations = Number(fuelwisePayload.summary?.total_stations || 0);
 
-                if (!visibleSeries.length || !summarySeries.length) {
+                if (!visibleSeries.length || !effectiveSummarySeries.length) {
                     shortageChartEl.innerHTML = "";
                     shortageChartEl.setAttribute("hidden", "hidden");
                     shortageEmptyEl.hidden = false;
@@ -698,7 +803,10 @@ async function loadBootData() {
                     }
                     renderShortageLegend([]);
                     shortageValueEl.textContent = "0";
-                    shortageChangeEl.textContent = "0%";
+                    shortageChangeEl.textContent = "Not enough history";
+                    if (shortageMonthChangeEl) {
+                        shortageMonthChangeEl.textContent = "Not enough history";
+                    }
                     return;
                 }
 
@@ -706,7 +814,7 @@ async function loadBootData() {
                 shortageEmptyEl.hidden = true;
                 renderShortageLegend(visibleSeries);
 
-                const summaryDates = summarySeries.map((point) => point.date).filter(Boolean);
+                const summaryDates = effectiveSummarySeries.map((point) => point.date).filter(Boolean);
                 const dates = (summaryDates.length
                     ? summaryDates
                     : Array.from(new Set(
@@ -747,12 +855,14 @@ async function loadBootData() {
 
                 const values = chartSeries.flatMap(([, points]) => points.filter((point) => !point.missing).map((point) => point.count));
                 const maxValue = Math.max(...values, 1);
-                const latest = summarySeries[summarySeries.length - 1];
-                shortageValueEl.textContent = formatShortageValue(latest?.count, totalStations);
-                shortageChangeEl.textContent = formatPercentChange(
-                    Number(summarySeries[0]?.count || 0),
-                    Number(latest?.count || 0)
-                );
+                const latest = effectiveSummarySeries[effectiveSummarySeries.length - 1];
+                const yesterdayPoint = pointDaysAgo(effectiveSummarySeries, 1);
+                const monthPoint = pointDaysAgo(effectiveSummarySeries, 30);
+                shortageValueEl.textContent = formatPercent(latest?.percentage || 0);
+                shortageChangeEl.textContent = formatDeltaLabel(latest?.percentage || 0, yesterdayPoint?.percentage);
+                if (shortageMonthChangeEl) {
+                    shortageMonthChangeEl.textContent = formatDeltaLabel(latest?.percentage || 0, monthPoint?.percentage);
+                }
 
                 const yTicks = chartConfig.ySteps.map((step) => {
                     const value = maxValue * step;
@@ -946,6 +1056,7 @@ async function loadBootData() {
                     return;
                 }
                 const chartConfig = getChartConfig("price");
+                const timeframeDays = getSelectedTimeframeDays();
                 const priceChartWidth = chartConfig.width;
                 const priceChartHeight = chartConfig.height;
                 const pricePadding = chartConfig.padding;
@@ -958,14 +1069,15 @@ async function loadBootData() {
                     ? (priceTrend.fuel_types || [])
                     : [normalizedSelectedFuelType]
                 ).filter((fuelType) => fuelType !== "SP95" && Array.isArray(allSeries[fuelType]) && allSeries[fuelType].length);
-                const visibleSeries = visibleFuelTypes.map((fuelType) => [fuelType, allSeries[fuelType]]);
-                const summaryPoints = Array.isArray(priceTrend.points) ? priceTrend.points : [];
+                const visibleSeries = visibleFuelTypes.map((fuelType) => [fuelType, sliceSeriesWindow(allSeries[fuelType], timeframeDays)]);
+                const summaryPoints = sliceSeriesWindow(Array.isArray(priceTrend.points) ? priceTrend.points : [], timeframeDays);
 
-                priceValueEl.textContent = formatPrice(priceTrend.latest_price);
-                priceChangeEl.textContent = formatPriceDelta(priceTrend.latest_change);
-                pricePeriodChangeEl.textContent = summaryPoints.length
-                    ? formatPercentChange(Number(summaryPoints[0].price || 0), Number(summaryPoints[summaryPoints.length - 1].price || 0))
-                    : "0%";
+                const latestPoint = summaryPoints[summaryPoints.length - 1];
+                const previousPoint = pointDaysAgo(summaryPoints, 1);
+                const monthPoint = pointDaysAgo(summaryPoints, 30);
+                priceValueEl.textContent = formatPrice(latestPoint?.price ?? priceTrend.latest_price);
+                priceChangeEl.textContent = previousPoint ? formatPriceDelta(Number(latestPoint?.price || 0) - Number(previousPoint.price || 0)) : "-";
+                pricePeriodChangeEl.textContent = monthPoint ? formatPriceDelta(Number(latestPoint?.price || 0) - Number(monthPoint.price || 0)) : "-";
 
                 if (!visibleSeries.length || !summaryPoints.length) {
                     priceChartEl.innerHTML = "";
@@ -973,6 +1085,9 @@ async function loadBootData() {
                     priceEmptyEl.hidden = false;
                     priceTooltipEl.hidden = true;
                     renderPriceLegend([]);
+                    priceValueEl.textContent = "-";
+                    priceChangeEl.textContent = "-";
+                    pricePeriodChangeEl.textContent = "-";
                     return;
                 }
 
@@ -1436,7 +1551,7 @@ async function loadBootData() {
                             <strong>${escapeHtml(properties.nom || metrics?.name || code)}</strong>
                             <div>${escapeHtml(code)}</div>
                             <div class="popup-metric"><strong>${escapeHtml(formatPercent(issueRate))}</strong> of stations affected</div>
-                            <div>${escapeHtml(`${affected} / ${total} stations`)}</div>
+                            <div>${escapeHtml(`${formatInteger(affected)} / ${formatInteger(total)} stations`)}</div>
                         </div>
                     `;
                 }
@@ -1755,7 +1870,7 @@ async function loadBootData() {
                 }
                 renderStations([]);
                 if (detailListEl) {
-                    detailListEl.innerHTML = `<p class="empty-state">${escapeHtml(fuelwiseCopy.detail.loading)}</p>`;
+                    detailListEl.innerHTML = `<tr><td colspan="3" class="empty-state-cell">${escapeHtml(fuelwiseCopy.detail.loading)}</td></tr>`;
                 }
                 resetStationChart();
 
@@ -1782,7 +1897,7 @@ async function loadBootData() {
                     }
                     if (detailNoteEl) {
                         detailNoteEl.textContent = replaceTokens(fuelwiseCopy.detail.showing, {
-                            count: Array.isArray(payload.stations) ? payload.stations.length : 0,
+                            count: formatInteger(Array.isArray(payload.stations) ? payload.stations.length : 0),
                             date: payload.snapshot_date || fuelwisePayload.latest_snapshot_date || ""
                         });
                     }
@@ -1802,7 +1917,7 @@ async function loadBootData() {
                         detailNoteEl.textContent = fuelwiseCopy.detail.failed_note;
                     }
                     if (detailListEl) {
-                        detailListEl.innerHTML = `<p class="empty-state">${escapeHtml(fuelwiseCopy.detail.failed)}</p>`;
+                        detailListEl.innerHTML = `<tr><td colspan="3" class="empty-state-cell">${escapeHtml(fuelwiseCopy.detail.failed)}</td></tr>`;
                     }
                     pendingStationSelection = null;
                 }
@@ -1851,7 +1966,7 @@ async function loadBootData() {
                     stationChartTitleEl.textContent = replaceTokens(fuelwiseCopy.station_chart.station_title, { station: selectedStationName });
                 }
                 if (stationChartNoteEl) {
-                    stationChartNoteEl.textContent = shortageify(fuelwiseCopy.station_chart.loading_note);
+                    stationChartNoteEl.textContent = `Loading ${getSelectedTimeframeLabel().toLowerCase()} for this station...`;
                 }
                 if (stationChartEl) {
                     stationChartEl.innerHTML = "";
@@ -1873,7 +1988,7 @@ async function loadBootData() {
                     source_type: fuelwisePayload.snapshot_source_type || "official",
                     snapshot_date: fuelwisePayload.latest_snapshot_date || "",
                     fuel_type: fuelwisePayload.filters?.fuel_type || "all",
-                    days: "30"
+                    days: String(getSelectedTimeframeDays() || 365)
                 });
 
                 try {
@@ -1891,10 +2006,7 @@ async function loadBootData() {
                         });
                     }
                     if (stationChartNoteEl) {
-                        stationChartNoteEl.textContent = shortageify(replaceTokens(fuelwiseCopy.station_chart.showing, {
-                            days: payload.days || 30,
-                            total: payload.totals?.period_total || 0
-                        }));
+                        stationChartNoteEl.textContent = `${formatInteger(payload.totals?.period_total || 0)} shortage instances over ${payload.days || 30} days.`;
                     }
                     renderStationChart(payload);
                 } catch (error) {
@@ -1930,6 +2042,9 @@ async function loadBootData() {
                 }
                 if (payload.filters?.department_code) {
                     params.set("department_code", payload.filters.department_code);
+                }
+                if (getSelectedTimeframeDays()) {
+                    params.set("timeframe", String(getSelectedTimeframeDays()));
                 }
                 const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`;
                 window.history.replaceState({}, "", nextUrl);
@@ -2020,6 +2135,17 @@ async function loadBootData() {
             });
             fuelEl?.addEventListener("change", refreshDashboard);
             departmentEl?.addEventListener("change", refreshDashboard);
+            timeframeEl?.addEventListener("change", async () => {
+                renderActiveFilters(fuelwisePayload);
+                renderShortageChart();
+                renderPriceChart();
+                updateUrlFromPayload(fuelwisePayload);
+                if (selectedStationId) {
+                    await loadStationTrend(selectedStationId, selectedStationName);
+                } else {
+                    resetStationChart();
+                }
+            });
             stationSearchEl?.addEventListener("input", (event) => {
                 stationSearchTerm = String(event.target.value || "");
                 renderStations(detailStations, { store: false });
@@ -2044,6 +2170,19 @@ async function loadBootData() {
                     pendingStationSelection = null;
                     resetStationChart();
                 }
+                if (badgeEl.dataset.filterKind === "timeframe" && timeframeEl) {
+                    timeframeEl.value = "all";
+                    renderActiveFilters(fuelwisePayload);
+                    renderShortageChart();
+                    renderPriceChart();
+                    updateUrlFromPayload(fuelwisePayload);
+                    if (selectedStationId) {
+                        loadStationTrend(selectedStationId, selectedStationName);
+                    } else {
+                        resetStationChart();
+                    }
+                    return;
+                }
                 refreshDashboard();
             });
 
@@ -2064,6 +2203,16 @@ async function loadBootData() {
                 const chipEl = event.target.closest(".department-chip");
                 if (chipEl) {
                     applyDepartmentFilter(chipEl.dataset.departmentCode, chipEl.dataset.departmentName);
+                }
+            });
+            barChartEl?.addEventListener("click", (event) => {
+                const barEl = event.target.closest(".bar-row");
+                if (!barEl) {
+                    return;
+                }
+                const match = (fuelwisePayload.departments || []).find((department) => department.name === barEl.dataset.departmentName);
+                if (match) {
+                    applyDepartmentFilter(match.code, match.name);
                 }
             });
             detailListEl?.addEventListener("click", (event) => {
