@@ -1,0 +1,903 @@
+:root {
+    --bg: #08111d;
+    --panel: rgba(10, 23, 38, 0.84);
+    --panel-border: rgba(255, 255, 255, 0.08);
+    --text: #f6f8fb;
+    --muted: #9db0c3;
+    --accent: #64d3ff;
+    --critical: #ff6b57;
+    --warning: #ffbf47;
+    --stable: #46d29e;
+    --shadow: 0 24px 60px rgba(1, 7, 16, 0.45);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--text);
+    font-family: "Manrope", sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(100, 211, 255, 0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(255, 107, 87, 0.14), transparent 22%),
+        linear-gradient(180deg, #07111b 0%, #091827 52%, #060d15 100%);
+}
+
+.page-shell {
+    width: min(1200px, calc(100vw - 32px));
+    margin: 0 auto;
+    padding: 28px 0 40px;
+    transition: opacity 160ms ease, filter 160ms ease;
+}
+
+.page-shell.is-loading {
+    opacity: 0.72;
+    filter: saturate(0.92);
+}
+
+.hero,
+.metrics-grid,
+.dashboard-grid,
+.callout,
+.chart-panel {
+    margin-bottom: 18px;
+}
+
+.hero,
+.panel,
+.metric-card,
+.callout {
+    border: 1px solid var(--panel-border);
+    background: var(--panel);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+}
+
+.hero {
+    padding: 28px;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1.8fr 1fr;
+    align-items: end;
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    font-size: 0.82rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+h1,
+h2,
+.metric-value {
+    font-family: "Space Grotesk", sans-serif;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.8rem);
+    line-height: 0.95;
+}
+
+h2 {
+    margin: 0;
+    font-size: 1.35rem;
+}
+
+.hero-summary,
+.panel-note,
+.subtle,
+.metric-foot,
+.row-sub,
+.station-row p,
+.callout p,
+.empty-state {
+    color: var(--muted);
+}
+
+.hero-summary {
+    max-width: 58ch;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.hero-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.pill,
+.status-badge,
+.area-chip,
+.fuel-tags span {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.pill {
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.pill-live {
+    background: rgba(70, 210, 158, 0.16);
+    color: #c7ffe7;
+}
+
+.pill-mock,
+.pill-empty,
+.pill-inferred {
+    background: rgba(255, 191, 71, 0.16);
+    color: #ffe6af;
+}
+
+.callout {
+    padding: 20px 22px;
+}
+
+.callout h2 {
+    margin-bottom: 8px;
+}
+
+.metrics-grid,
+.dashboard-grid {
+    display: grid;
+    gap: 18px;
+}
+
+.metrics-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.metric-card {
+    padding: 22px;
+}
+
+.metric-label {
+    display: block;
+    color: var(--muted);
+    margin-bottom: 14px;
+}
+
+.metric-value {
+    display: block;
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 8px;
+}
+
+.dashboard-grid {
+    grid-template-columns: 0.85fr 1.15fr;
+}
+
+.bottom-grid {
+    grid-template-columns: 0.8fr 1.2fr;
+}
+
+.detail-grid {
+    grid-template-columns: 1fr 1fr;
+}
+
+.panel {
+    padding: 22px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.chart-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: end;
+    margin-bottom: 16px;
+}
+
+.control {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 190px;
+}
+
+.control span,
+.chart-stat-label {
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+.control select {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 12px 14px;
+    font: inherit;
+}
+
+.chart-stat {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+}
+
+.chart-stat strong {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 2rem;
+}
+
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+}
+
+.chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    font-size: 0.92rem;
+}
+
+.chart-tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    font-size: 0.92rem;
+}
+
+.chart-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--swatch, var(--accent));
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+    flex: 0 0 auto;
+}
+
+.chart-shell {
+    position: relative;
+    min-height: 320px;
+    border-radius: 22px;
+    overflow: hidden;
+    background:
+        linear-gradient(180deg, rgba(13, 26, 42, 0.95), rgba(8, 17, 29, 0.95)),
+        radial-gradient(circle at top left, rgba(100, 211, 255, 0.12), transparent 32%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#fuelwise-chart {
+    width: 100%;
+    height: 320px;
+    display: block;
+}
+
+#fuelwise-price-chart,
+#fuelwise-station-chart {
+    width: 100%;
+    height: 320px;
+    display: block;
+}
+
+.chart-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+}
+
+.chart-tick line {
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 1;
+}
+
+.chart-tick text,
+.chart-x-label {
+    fill: var(--muted);
+    font-size: 12px;
+    font-family: "Manrope", sans-serif;
+}
+
+.chart-axis-label {
+    fill: rgba(157, 176, 195, 0.92);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: "Manrope", sans-serif;
+}
+
+.chart-area {
+    fill: url(#fuelwiseAreaFill);
+}
+
+.chart-line {
+    fill: none;
+    stroke: var(--line-color, var(--accent));
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.chart-line-shortage {
+    stroke-width: 3;
+    filter: drop-shadow(0 8px 18px rgba(8, 17, 29, 0.28));
+}
+
+.chart-line-price {
+    stroke: #ffbf47;
+}
+
+.chart-line-price-series {
+    stroke-width: 3;
+    filter: drop-shadow(0 8px 18px rgba(8, 17, 29, 0.24));
+}
+
+.chart-point {
+    fill: var(--point-color, var(--accent));
+    stroke: rgba(8, 17, 29, 0.9);
+    stroke-width: 3;
+}
+
+.chart-point-shortage {
+    filter: drop-shadow(0 4px 10px rgba(8, 17, 29, 0.34));
+}
+
+.chart-hover-target {
+    cursor: crosshair;
+}
+
+.chart-hover-line {
+    stroke: rgba(255, 255, 255, 0.16);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 6;
+    opacity: 0;
+    transition: opacity 120ms ease;
+    pointer-events: none;
+}
+
+.chart-hover-target.is-active .chart-hover-line {
+    opacity: 1;
+}
+
+.chart-tooltip {
+    position: absolute;
+    min-width: 170px;
+    max-width: min(280px, calc(100% - 24px));
+    transform: translate(-50%, calc(-100% - 12px));
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(8, 17, 29, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow);
+    pointer-events: none;
+    display: grid;
+    gap: 4px;
+    font-size: 0.88rem;
+}
+
+.chart-tooltip.chart-tooltip-below {
+    transform: translate(-50%, 12px);
+}
+
+.chart-tooltip.chart-tooltip-above {
+    transform: translate(-50%, calc(-100% - 12px));
+}
+
+.chart-tooltip strong {
+    font-family: "Space Grotesk", sans-serif;
+}
+
+.chart-tooltip-row + .chart-tooltip-row {
+    margin-top: 2px;
+}
+
+.france-map {
+    position: relative;
+    min-height: 420px;
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at center, rgba(100, 211, 255, 0.08), transparent 48%),
+        linear-gradient(180deg, rgba(16, 32, 48, 0.95), rgba(8, 17, 29, 0.92));
+    overflow: hidden;
+}
+
+.france-map-canvas {
+    width: 100%;
+    min-height: 420px;
+}
+
+.map-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    background:
+        radial-gradient(circle at center, rgba(100, 211, 255, 0.08), transparent 42%),
+        linear-gradient(180deg, rgba(16, 32, 48, 0.32), rgba(8, 17, 29, 0.08));
+    pointer-events: none;
+}
+
+.status-critical,
+.area-chip-critical {
+    background: rgba(255, 107, 87, 0.18);
+    color: #ffd4cc;
+}
+
+.status-warning,
+.area-chip-warning {
+    background: rgba(255, 191, 71, 0.18);
+    color: #ffe7af;
+}
+
+.status-stable,
+.area-chip-stable {
+    background: rgba(70, 210, 158, 0.18);
+    color: #cbffea;
+}
+
+.map-legend {
+    position: absolute;
+    left: 18px;
+    bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(4, 10, 19, 0.66);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.88rem;
+}
+
+.legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    display: inline-block;
+    margin-right: 7px;
+}
+
+.legend-critical {
+    background: var(--critical);
+}
+
+.legend-warning {
+    background: var(--warning);
+}
+
+.legend-stable {
+    background: var(--stable);
+}
+
+.france-map .leaflet-container {
+    background: #0a1622;
+    font: inherit;
+}
+
+.france-map .leaflet-control-zoom a {
+    background: rgba(8, 17, 29, 0.92);
+    color: var(--text);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.france-map .leaflet-popup-content-wrapper,
+.france-map .leaflet-popup-tip {
+    background: rgba(8, 17, 29, 0.96);
+    color: var(--text);
+}
+
+.fuelwise-popup {
+    line-height: 1.45;
+}
+
+.fuelwise-popup strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.table-shell {
+    overflow-x: auto;
+}
+
+.department-status-panel {
+    min-width: 0;
+}
+
+.department-table-shell {
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.department-table-shell thead th {
+    position: sticky;
+    top: 0;
+    background: rgba(10, 23, 38, 0.96);
+    z-index: 1;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    vertical-align: top;
+}
+
+th {
+    color: var(--muted);
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.row-sub,
+.station-row p {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.88rem;
+}
+
+.status-badge,
+.area-chip,
+.fuel-tags span {
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.department-row {
+    cursor: pointer;
+    transition: background 160ms ease, transform 160ms ease;
+}
+
+.department-row:hover,
+.department-row:focus-visible,
+.department-row.is-active {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.station-item {
+    cursor: pointer;
+    transition: background 160ms ease, transform 160ms ease;
+    border-radius: 16px;
+    padding: 14px 12px;
+    margin: 0 -12px;
+}
+
+.station-item:hover,
+.station-item:focus-visible,
+.station-item.is-active {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.department-chip {
+    appearance: none;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+}
+
+.department-chip.is-active {
+    outline: 2px solid rgba(100, 211, 255, 0.35);
+    outline-offset: 1px;
+}
+
+.station-list {
+    display: grid;
+    gap: 12px;
+}
+
+.bar-chart {
+    display: grid;
+    gap: 14px;
+}
+
+.bar-row {
+    display: grid;
+    grid-template-columns: minmax(110px, 0.9fr) 1.8fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.bar-label,
+.bar-value {
+    font-size: 0.92rem;
+}
+
+.bar-track {
+    height: 12px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+}
+
+.bar-fill-critical {
+    background: linear-gradient(90deg, rgba(255, 107, 87, 0.85), rgba(255, 107, 87, 0.45));
+}
+
+.bar-fill-warning {
+    background: linear-gradient(90deg, rgba(255, 191, 71, 0.85), rgba(255, 191, 71, 0.45));
+}
+
+.bar-fill-stable {
+    background: linear-gradient(90deg, rgba(70, 210, 158, 0.85), rgba(70, 210, 158, 0.45));
+}
+
+.station-row {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.station-item:last-child {
+    border-bottom-color: transparent;
+}
+
+.chart-shell-station svg {
+    width: 100%;
+    height: 320px;
+    display: block;
+}
+
+.station-bar-group {
+    cursor: crosshair;
+}
+
+.station-bar-group.is-active rect:not(.station-bar-hover) {
+    filter: brightness(1.08);
+}
+
+.station-row strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.station-row p {
+    margin: 0;
+}
+
+.fuel-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    align-self: start;
+}
+
+.empty-state {
+    margin: 0;
+}
+
+@media (max-width: 980px) {
+    .hero,
+    .metrics-grid,
+    .dashboard-grid,
+    .bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-meta {
+        align-items: flex-start;
+    }
+
+    .chart-stat {
+        margin-left: 0;
+        align-items: flex-start;
+    }
+
+}
+
+@media (max-width: 640px) {
+    .page-shell {
+        width: min(100vw - 20px, 1200px);
+        padding-top: 16px;
+    }
+
+    .hero,
+    .panel,
+    .metric-card,
+    .callout {
+        border-radius: 20px;
+    }
+
+    .hero,
+    .panel,
+    .metric-card {
+        padding: 18px;
+    }
+
+    .hero {
+        gap: 12px;
+    }
+
+    .hero-summary,
+    .panel-note,
+    .subtle,
+    .metric-foot,
+    .row-sub,
+    .station-row p,
+    .callout p,
+    .empty-state {
+        font-size: 0.92rem;
+        line-height: 1.45;
+    }
+
+    .metric-label,
+    .chart-stat-label,
+    .control span {
+        font-size: 0.8rem;
+    }
+
+    .metric-value {
+        font-size: clamp(1.7rem, 9vw, 2.3rem);
+    }
+
+    .chart-controls {
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .control {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .control select {
+        min-height: 46px;
+        font-size: 0.95rem;
+    }
+
+    .chart-legend {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: thin;
+    }
+
+    .chart-legend-item {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        font-size: 0.86rem;
+    }
+
+    .chart-stat {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .chart-stat strong {
+        font-size: 1.5rem;
+    }
+
+    .chart-shell {
+        min-height: 260px;
+    }
+
+    #fuelwise-chart,
+    #fuelwise-price-chart,
+    #fuelwise-station-chart,
+    .chart-shell-station svg {
+        height: 260px;
+    }
+
+    .chart-tooltip {
+        min-width: 148px;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+
+    .map-legend {
+        position: static;
+        margin: 12px;
+        border-radius: 18px;
+        padding: 10px 12px;
+        font-size: 0.8rem;
+    }
+
+    .department-table-shell {
+        max-height: none;
+        padding-right: 0;
+    }
+
+    th,
+    td {
+        padding: 12px 0;
+        font-size: 0.9rem;
+    }
+
+    .status-badge,
+    .area-chip,
+    .fuel-tags span {
+        padding: 9px 12px;
+        font-size: 0.84rem;
+    }
+
+    .chip-list {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scroll-snap-type: x proximity;
+    }
+
+    .department-chip {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+    }
+
+    .panel-header,
+    .station-row {
+        grid-template-columns: 1fr;
+    }
+
+    .bar-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .bar-label,
+    .bar-value {
+        font-size: 0.88rem;
+    }
+
+    .fuel-tags {
+        justify-content: flex-start;
+    }
+
+    .france-map,
+    .france-shape {
+        min-height: 360px;
+    }
+
+}

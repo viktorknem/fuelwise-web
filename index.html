@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuelWise | Fuel shortages and smarter refuelling</title>
+    <meta name="description" content="FuelWise is the mobile companion for smarter refuelling in France, with a public web dashboard for rupture monitoring during fuel stress events.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+    <main class="site-shell">
+        <section class="hero-card">
+            <div class="hero-copy">
+                <p class="eyebrow">FuelWise</p>
+                <h1>Know where fuel pressure is rising before it changes your route.</h1>
+                <p class="lead">
+                    FuelWise helps drivers spot better refuelling options on mobile, while this web experience tracks rupture stations in France during exceptional supply stress.
+                </p>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="/rupture-stations">Open rupture dashboard</a>
+                    <a class="button button-secondary" href="https://www.voppy.app/api/fuelwise/health">Backend health</a>
+                </div>
+            </div>
+            <div class="hero-panel">
+                <div class="signal-card">
+                    <span class="signal-label">Mobile app</span>
+                    <strong>Find practical refuelling options</strong>
+                    <p>Built for in-car decision making, with routing-oriented backend recommendations staying inside Voppy.</p>
+                </div>
+                <div class="signal-card">
+                    <span class="signal-label">Web monitor</span>
+                    <strong>Track rupture stations</strong>
+                    <p>A dedicated public dashboard for exceptional shortage scenarios, deployed separately on Vercel.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="info-grid">
+            <article class="info-card">
+                <p class="eyebrow">What lives here</p>
+                <h2>Public-facing FuelWise pages</h2>
+                <p>
+                    This Vercel app hosts the branded FuelWise homepage and the rupture monitoring dashboard. It stays lightweight, fast, and easy to ship independently from the backend.
+                </p>
+            </article>
+            <article class="info-card">
+                <p class="eyebrow">What stays in Voppy</p>
+                <h2>Backend-only FuelWise API</h2>
+                <p>
+                    The `fuelwise/` subfolder remains the source of truth for scraping, database access, dashboard data assembly, and REST endpoints consumed by both the mobile app and this web frontend.
+                </p>
+            </article>
+            <article class="info-card">
+                <p class="eyebrow">Rupture page</p>
+                <h2>Built for high-stress moments</h2>
+                <p>
+                    The rupture stations page is focused on visibility: where shortages are spreading, which departments are under pressure, and which stations are currently affected.
+                </p>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

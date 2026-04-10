@@ -1,0 +1,1724 @@
+const apiBase = window.FUELWISE_CONFIG?.apiBase || "/api/fuelwise";
+
+let fuelwisePayload = null;
+let fuelwiseCopy = null;
+
+const fuelwiseUrls = {
+    dashboard: `${apiBase}/dashboard`,
+    drilldown: `${apiBase}/dashboard/drilldown`,
+    stationTrend: `${apiBase}/dashboard/station-trend`,
+    mapMarkers: `${apiBase}/dashboard/map-markers`,
+    priceTrend: `${apiBase}/dashboard/price-trend`,
+    copy: `${apiBase}/dashboard-copy`
+};
+
+async function loadBootData() {
+            const params = new URLSearchParams(window.location.search);
+            const query = params.toString();
+            const requestUrls = [
+                `${fuelwiseUrls.copy}`,
+                `${fuelwiseUrls.dashboard}${query ? `?${query}` : ''}`
+            ];
+            const [copyResponse, dashboardResponse] = await Promise.all(
+                requestUrls.map((url) => fetch(url, { headers: { 'Accept': 'application/json' } }))
+            );
+            if (!copyResponse.ok || !dashboardResponse.ok) {
+                throw new Error('Failed to load FuelWise dashboard data');
+            }
+            const copyPayload = await copyResponse.json();
+            const dashboardPayload = await dashboardResponse.json();
+            document.documentElement.lang = copyPayload.lang || 'en';
+            document.title = copyPayload.copy?.page_title || 'FuelWise Supply Dashboard';
+            const descriptionEl = document.querySelector('meta[name="description"]');
+            if (descriptionEl && copyPayload.copy?.meta_description) {
+                descriptionEl.setAttribute('content', copyPayload.copy.meta_description);
+            }
+            fuelwiseCopy = copyPayload.copy;
+            fuelwisePayload = dashboardPayload;
+}
+
+(async function initFuelwiseDashboard() {
+    try {
+        await loadBootData();
+    } catch (error) {
+        console.error("Failed to boot FuelWise dashboard", error);
+        const shell = document.querySelector(".page-shell");
+        if (shell) {
+            shell.innerHTML = `<section class="hero"><div class="hero-copy"><p class="eyebrow">FuelWise</p><h1>Dashboard unavailable</h1><p class="hero-summary">The FuelWise web app could not reach the backend API. Check the Vercel API rewrite and backend availability, then try again.</p></div></section>`;
+        }
+        return;
+    }
+
+    const pageShellEl = document.querySelector(".page-shell");
+            const formEl = document.getElementById("fuelwise-global-filter-form");
+            const fuelEl = document.getElementById("fuelwise-global-fuel-filter");
+            const departmentEl = document.getElementById("fuelwise-global-department-filter");
+            const heroScopeEl = document.getElementById("fuelwise-hero-scope");
+            const heroSummaryEl = document.getElementById("fuelwise-hero-summary");
+            const sourcePillEl = document.getElementById("fuelwise-source-pill");
+            const dbStatusEl = document.getElementById("fuelwise-db-status");
+            const generatedAtEl = document.getElementById("fuelwise-generated-at");
+            const totalStationsEl = document.getElementById("fuelwise-metric-total-stations");
+            const shortageStationsEl = document.getElementById("fuelwise-metric-shortage-stations");
+            const affectedDepartmentsEl = document.getElementById("fuelwise-metric-affected-departments");
+            const shortageRowsEl = document.getElementById("fuelwise-metric-shortage-rows");
+            const departmentsBodyEl = document.getElementById("fuelwise-departments-body");
+            const chipListEl = document.getElementById("fuelwise-chip-list");
+            const barChartEl = document.getElementById("fuelwise-bar-chart");
+            const detailListEl = document.getElementById("fuelwise-station-detail-list");
+            const detailTitleEl = document.getElementById("fuelwise-detail-title");
+            const detailNoteEl = document.getElementById("fuelwise-detail-note");
+            const stationChartTitleEl = document.getElementById("fuelwise-station-chart-title");
+            const stationChartNoteEl = document.getElementById("fuelwise-station-chart-note");
+            const stationChartLegendEl = document.getElementById("fuelwise-station-chart-legend");
+            const stationChartEl = document.getElementById("fuelwise-station-chart");
+            const stationChartEmptyEl = document.getElementById("fuelwise-station-chart-empty");
+            const stationChartTooltipEl = document.getElementById("fuelwise-station-chart-tooltip");
+            const stationChartValueEl = document.getElementById("fuelwise-station-chart-value");
+            const stationChartTotalEl = document.getElementById("fuelwise-station-chart-total");
+
+            const shortageChartEl = document.getElementById("fuelwise-chart");
+            const shortageEmptyEl = document.getElementById("fuelwise-chart-empty");
+            const shortageTooltipEl = document.getElementById("fuelwise-chart-tooltip");
+            const shortageLegendEl = document.getElementById("fuelwise-chart-legend");
+            const shortageValueEl = document.getElementById("fuelwise-chart-value");
+            const shortageChangeEl = document.getElementById("fuelwise-chart-change");
+
+            const priceChartEl = document.getElementById("fuelwise-price-chart");
+            const priceEmptyEl = document.getElementById("fuelwise-price-chart-empty");
+            const priceTooltipEl = document.getElementById("fuelwise-price-tooltip");
+            const priceLegendEl = document.getElementById("fuelwise-price-chart-legend");
+            const priceValueEl = document.getElementById("fuelwise-price-value");
+            const priceChangeEl = document.getElementById("fuelwise-price-change");
+            const pricePeriodChangeEl = document.getElementById("fuelwise-price-period-change");
+
+            const shortageAxisLabels = fuelwiseCopy.lang === "fr"
+                ? { left: "Stations en penurie", right: "Part des stations" }
+                : { left: "Stations with shortages", right: "Share of stations" };
+            const shortageSeriesColors = {
+                all: "#64d3ff",
+                Gazole: "#ffbf47",
+                SP95: "#ffbf47",
+                E10: "#46d29e",
+                SP98: "#ff6b57"
+            };
+            const fuelDisplayNames = {
+                all: "All",
+                SP95: "SP95-E10",
+                E10: "SP95-E10"
+            };
+            const stationSeriesColors = {
+                all: "#64d3ff",
+                Gazole: "#ffbf47",
+                SP95: "#ffbf47",
+                E10: "#46d29e",
+                SP98: "#ff6b57",
+                E85: "#9e7bff",
+                GPLc: "#f78fb3",
+                Unknown: "#9db0c3"
+            };
+
+            let selectedDetailDepartmentCode = "";
+            let selectedDetailDepartmentName = "";
+            let dashboardRequest = null;
+            let selectedStationId = null;
+            let selectedStationName = "";
+            let stationTrendRequest = null;
+            let pendingStationSelection = null;
+            let currentStationTrendPayload = null;
+            let resizeFrame = null;
+
+            function isPhoneViewport() {
+                return window.matchMedia("(max-width: 640px)").matches;
+            }
+
+            function isTabletViewport() {
+                return window.matchMedia("(max-width: 980px)").matches;
+            }
+
+            function getChartConfig(kind) {
+                const isPhone = isPhoneViewport();
+                const isTablet = isTabletViewport();
+                const base = {
+                    shortage: {
+                        width: isPhone ? 640 : 960,
+                        height: isPhone ? 260 : 320,
+                        padding: isPhone
+                            ? { top: 18, right: 46, bottom: 38, left: 40 }
+                            : { top: 20, right: 66, bottom: 44, left: 58 },
+                        xTickCount: isPhone ? 4 : (isTablet ? 5 : 7),
+                        ySteps: isPhone ? [0, 0.5, 1] : [0, 0.25, 0.5, 0.75, 1],
+                        showAxisLabels: !isPhone,
+                        tooltipBounds: { min: isPhone ? 18 : 14, max: isPhone ? 82 : 86 },
+                        pointRadius: isPhone ? 4 : 5
+                    },
+                    price: {
+                        width: isPhone ? 640 : 960,
+                        height: isPhone ? 260 : 320,
+                        padding: isPhone
+                            ? { top: 18, right: 16, bottom: 38, left: 46 }
+                            : { top: 20, right: 24, bottom: 44, left: 64 },
+                        xTickCount: isPhone ? 4 : (isTablet ? 5 : 7),
+                        ySteps: isPhone ? [0, 0.5, 1] : [0, 0.25, 0.5, 0.75, 1],
+                        tooltipBounds: { min: isPhone ? 18 : 14, max: isPhone ? 82 : 86 },
+                        pointRadius: isPhone ? 4 : 5
+                    },
+                    station: {
+                        width: isPhone ? 640 : 960,
+                        height: isPhone ? 260 : 320,
+                        padding: isPhone
+                            ? { top: 18, right: 16, bottom: 38, left: 40 }
+                            : { top: 20, right: 24, bottom: 44, left: 58 },
+                        xTickCount: isPhone ? 4 : (isTablet ? 5 : 7),
+                        ySteps: isPhone ? [0, 0.5, 1] : [0, 0.25, 0.5, 0.75, 1],
+                        tooltipBounds: { min: isPhone ? 14 : 12, max: isPhone ? 86 : 88 }
+                    }
+                };
+                return base[kind];
+            }
+
+            function setChartViewport(svgEl, config) {
+                if (!svgEl || !config) {
+                    return;
+                }
+                svgEl.setAttribute("viewBox", `0 0 ${config.width} ${config.height}`);
+                svgEl.setAttribute("preserveAspectRatio", isPhoneViewport() ? "xMidYMid meet" : "none");
+            }
+
+            function getVisibleLabelStep(pointCount, targetCount) {
+                if (pointCount <= targetCount) {
+                    return 1;
+                }
+                return Math.max(1, Math.ceil((pointCount - 1) / Math.max(targetCount - 1, 1)));
+            }
+
+            function formatChartDateLabel(value) {
+                return String(value || "").slice(5).replace("-", "/");
+            }
+
+            function escapeHtml(value) {
+                return String(value ?? "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/\"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+            }
+
+            function setPageLoading(isLoading) {
+                if (!pageShellEl) {
+                    return;
+                }
+                pageShellEl.classList.toggle("is-loading", isLoading);
+                if (fuelEl) {
+                    fuelEl.disabled = isLoading;
+                }
+                if (departmentEl) {
+                    departmentEl.disabled = isLoading;
+                }
+            }
+
+            function replaceTokens(template, values) {
+                let output = String(template || "");
+                Object.entries(values || {}).forEach(([key, value]) => {
+                    output = output.replace(`{${key}}`, value ?? "");
+                });
+                return output;
+            }
+
+            function formatInteger(value) {
+                return `${Math.round(Number(value || 0))}`;
+            }
+
+            function displayFuelName(value) {
+                return fuelDisplayNames[value] || value || "";
+            }
+
+            function scopeText(payload) {
+                const scope = payload?.scope || {};
+                if (scope.fuel_type === "all" && !scope.department_code) {
+                    return fuelwiseCopy.hero_scope_all;
+                }
+                if (scope.fuel_type !== "all" && !scope.department_code) {
+                    return replaceTokens(fuelwiseCopy.hero_scope_fuel_france, { fuel: displayFuelName(scope.fuel_type) });
+                }
+                if (scope.fuel_type === "all" && scope.department_code) {
+                    return replaceTokens(fuelwiseCopy.hero_scope_all_department, { department: scope.department_name });
+                }
+                return replaceTokens(fuelwiseCopy.hero_scope_fuel_department, {
+                    fuel: displayFuelName(scope.fuel_type),
+                    department: scope.department_name
+                });
+            }
+
+            function renderHero(payload) {
+                if (heroScopeEl) {
+                    heroScopeEl.textContent = scopeText(payload);
+                }
+                if (heroSummaryEl) {
+                    heroSummaryEl.textContent = replaceTokens(fuelwiseCopy.hero_summary, { date: payload.latest_snapshot_date || "" });
+                }
+                if (sourcePillEl) {
+                    sourcePillEl.className = `pill pill-${payload.data_mode || "live"}`;
+                    sourcePillEl.textContent = fuelwiseCopy.source_label[payload.data_mode] || fuelwiseCopy.source_label.live;
+                }
+                if (dbStatusEl) {
+                    dbStatusEl.textContent = payload.database?.connected ? fuelwiseCopy.database_connected : fuelwiseCopy.database_unavailable;
+                }
+                if (generatedAtEl) {
+                    generatedAtEl.textContent = replaceTokens(fuelwiseCopy.generated_at, { value: payload.generated_at || "" });
+                }
+            }
+
+            function renderMetrics(payload) {
+                if (totalStationsEl) {
+                    totalStationsEl.textContent = formatInteger(payload.summary?.total_stations);
+                }
+                if (shortageStationsEl) {
+                    shortageStationsEl.textContent = formatInteger(payload.summary?.stations_with_rupture);
+                }
+                if (affectedDepartmentsEl) {
+                    affectedDepartmentsEl.textContent = formatInteger(payload.summary?.affected_departments);
+                }
+                if (shortageRowsEl) {
+                    shortageRowsEl.textContent = formatInteger(payload.summary?.rupture_rows);
+                }
+            }
+
+            function renderSelectOptions(selectEl, options, selectedValue, kind) {
+                if (!selectEl) {
+                    return;
+                }
+                selectEl.innerHTML = (options || []).map((option) => {
+                    const value = kind === "department" ? option.code : option.value;
+                    if (kind === "fuel" && value === "SP95") {
+                        return "";
+                    }
+                    const label = kind === "department"
+                        ? (option.code === "" ? fuelwiseCopy.filters.all_france : option.name)
+                        : (option.value === "all" ? fuelwiseCopy.filters.all_main_fuels : displayFuelName(option.label));
+                    const normalizedSelectedValue = kind === "fuel" && selectedValue === "SP95" ? "E10" : selectedValue;
+                    const selected = value === normalizedSelectedValue ? " selected" : "";
+                    return `<option value="${escapeHtml(value)}"${selected}>${escapeHtml(label)}</option>`;
+                }).join("");
+            }
+
+            function renderDepartments(payload) {
+                const departments = Array.isArray(payload.departments) ? payload.departments : [];
+                if (!departmentsBodyEl) {
+                    return;
+                }
+                if (!departments.length) {
+                    departmentsBodyEl.innerHTML = `<tr><td colspan="4">${escapeHtml(fuelwiseCopy.departments.empty)}</td></tr>`;
+                    return;
+                }
+                departmentsBodyEl.innerHTML = departments.map((department) => `
+                    <tr class="department-row" data-department-code="${escapeHtml(department.code || "")}" data-department-name="${escapeHtml(department.name || "")}" tabindex="0" role="button">
+                        <td>
+                            <strong>${escapeHtml(department.name || "")}</strong>
+                            <span class="row-sub">${escapeHtml(replaceTokens(fuelwiseCopy.departments.row_sub, { value: department.issue_rate }))}</span>
+                        </td>
+                        <td><span class="status-badge status-${escapeHtml(department.status_level || "stable")}">${escapeHtml(fuelwiseCopy.status_labels[department.status_level] || department.status_label || "")}</span></td>
+                        <td>${escapeHtml(`${department.issue_station_count || 0} / ${department.total_station_count || 0}`)}</td>
+                        <td>${escapeHtml(`${department.rupture_count || 0}`)}</td>
+                    </tr>
+                `).join("");
+                setActiveDepartment(selectedDetailDepartmentCode);
+            }
+
+            function renderPriority(payload) {
+                const departments = Array.isArray(payload.departments) ? payload.departments : [];
+                if (!chipListEl) {
+                    return;
+                }
+                if (!departments.length) {
+                    chipListEl.innerHTML = `<span class="area-chip">${escapeHtml(fuelwiseCopy.priority.empty)}</span>`;
+                    return;
+                }
+                chipListEl.innerHTML = departments.map((department) => `
+                    <button
+                        type="button"
+                        class="area-chip area-chip-${escapeHtml(department.status_level || "stable")} department-chip"
+                        data-department-code="${escapeHtml(department.code || "")}"
+                        data-department-name="${escapeHtml(department.name || "")}"
+                    >
+                        ${escapeHtml(replaceTokens(fuelwiseCopy.priority.chip_label, { name: department.name, count: department.issue_station_count }))}
+                    </button>
+                `).join("");
+                setActiveDepartment(selectedDetailDepartmentCode);
+            }
+
+            function renderBars(payload) {
+                const items = Array.isArray(payload.bar_charts?.departments) ? payload.bar_charts.departments : [];
+                if (!barChartEl) {
+                    return;
+                }
+                if (!items.length) {
+                    barChartEl.innerHTML = `<p class="empty-state">${escapeHtml(fuelwiseCopy.bars.empty)}</p>`;
+                    return;
+                }
+                barChartEl.innerHTML = items.map((item) => `
+                    <div class="bar-row">
+                        <div class="bar-label">${escapeHtml(item.label || "")}</div>
+                        <div class="bar-track">
+                            <span class="bar-fill bar-fill-${escapeHtml(item.status_level || "stable")}" style="width: ${Number(item.width || 0)}%;"></span>
+                        </div>
+                        <div class="bar-value">${escapeHtml(`${item.value || 0} · ${Number(item.percentage || 0).toFixed(1)}%`)}</div>
+                    </div>
+                `).join("");
+            }
+
+            function renderStations(stations) {
+                if (!detailListEl) {
+                    return;
+                }
+                if (!Array.isArray(stations) || !stations.length) {
+                    detailListEl.innerHTML = `<p class="empty-state">${escapeHtml(fuelwiseCopy.detail.empty)}</p>`;
+                    return;
+                }
+                detailListEl.innerHTML = stations.map((station) => {
+                    const location = [station.city || "", station.address || ""].filter(Boolean).join(" · ");
+                    const fuels = Array.from(new Set((Array.isArray(station.fuel_list) ? station.fuel_list : []).map((fuel) => displayFuelName(fuel))));
+                    return `
+                        <div class="station-row station-item" data-station-id="${escapeHtml(station.station_id || "")}" data-station-name="${escapeHtml(station.name || fuelwiseCopy.common_station)}" tabindex="0" role="button">
+                            <div>
+                                <strong>${escapeHtml(station.name || fuelwiseCopy.common_station)}</strong>
+                                <p>${escapeHtml(location || fuelwiseCopy.detail.location_unavailable)}</p>
+                            </div>
+                            <div class="fuel-tags">
+                                ${fuels.map((fuel) => `<span>${escapeHtml(fuel)}</span>`).join("")}
+                            </div>
+                        </div>
+                    `;
+                }).join("");
+            }
+
+            function setActiveStation(stationId) {
+                document.querySelectorAll(".station-item").forEach((el) => {
+                    const isActive = Boolean(stationId) && Number(el.dataset.stationId) === Number(stationId);
+                    el.classList.toggle("is-active", isActive);
+                    el.setAttribute("aria-selected", isActive ? "true" : "false");
+                });
+            }
+
+            function scrollStationIntoView(stationId) {
+                if (!stationId) {
+                    return;
+                }
+                const stationEl = detailListEl?.querySelector(`.station-item[data-station-id="${String(stationId)}"]`);
+                stationEl?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+
+            function renderStationLegend(fuelTypes) {
+                if (!stationChartLegendEl) {
+                    return;
+                }
+                if (!Array.isArray(fuelTypes) || !fuelTypes.length) {
+                    stationChartLegendEl.innerHTML = "";
+                    return;
+                }
+                stationChartLegendEl.innerHTML = fuelTypes.map((fuelType) => `
+                    <span class="chart-legend-item">
+                        <i class="chart-legend-swatch" style="--swatch:${escapeHtml(stationSeriesColors[fuelType] || stationSeriesColors.Unknown)}"></i>
+                        ${escapeHtml(displayFuelName(fuelType))}
+                    </span>
+                `).join("");
+            }
+
+            function resetStationChart() {
+                if (stationTrendRequest) {
+                    stationTrendRequest.abort();
+                    stationTrendRequest = null;
+                }
+                currentStationTrendPayload = null;
+                selectedStationId = null;
+                selectedStationName = "";
+                setActiveStation(null);
+                renderStationLegend([]);
+                if (stationChartTitleEl) {
+                    stationChartTitleEl.textContent = fuelwiseCopy.station_chart.title;
+                }
+                if (stationChartNoteEl) {
+                    stationChartNoteEl.textContent = fuelwiseCopy.station_chart.note;
+                }
+                if (stationChartValueEl) {
+                    stationChartValueEl.textContent = "0";
+                }
+                if (stationChartTotalEl) {
+                    stationChartTotalEl.textContent = "0";
+                }
+                if (stationChartEl) {
+                    stationChartEl.innerHTML = "";
+                    stationChartEl.setAttribute("hidden", "hidden");
+                }
+                if (stationChartEmptyEl) {
+                    stationChartEmptyEl.hidden = false;
+                    stationChartEmptyEl.textContent = fuelwiseCopy.station_chart.empty;
+                }
+                if (stationChartTooltipEl) {
+                    stationChartTooltipEl.hidden = true;
+                }
+            }
+
+            function resetDetail(payload) {
+                selectedDetailDepartmentCode = "";
+                selectedDetailDepartmentName = "";
+                if (detailTitleEl) {
+                    detailTitleEl.textContent = fuelwiseCopy.detail.title;
+                }
+                if (detailNoteEl) {
+                    detailNoteEl.textContent = fuelwiseCopy.detail.note;
+                }
+                renderStations(payload.rupture_stations || []);
+                setActiveDepartment("");
+                resetStationChart();
+            }
+
+            function setActiveDepartment(code) {
+                document.querySelectorAll(".department-row, .department-chip").forEach((el) => {
+                    const isActive = Boolean(code) && el.dataset.departmentCode === code;
+                    el.classList.toggle("is-active", isActive);
+                    if (el.classList.contains("department-row")) {
+                        el.setAttribute("aria-selected", isActive ? "true" : "false");
+                    }
+                });
+            }
+
+            function formatShortageValue(value, totalStations) {
+                const numericValue = Number(value || 0);
+                if (!totalStations) {
+                    return `${formatInteger(numericValue)} · 0.0%`;
+                }
+                return `${formatInteger(numericValue)} · ${((numericValue / totalStations) * 100).toFixed(1)}%`;
+            }
+
+            function formatPercentChange(first, last) {
+                if (Math.abs(first) < 0.0001) {
+                    return last > 0 ? "+100%" : "0%";
+                }
+                const change = ((last - first) / Math.abs(first)) * 100;
+                const prefix = change > 0 ? "+" : "";
+                return `${prefix}${change.toFixed(1)}%`;
+            }
+
+            function formatCountLabel(value) {
+                return `${formatInteger(value)} ${Number(value || 0) === 1 ? "instance" : "instances"}`;
+            }
+
+            function buildChartPath(points, width, height, padding, maxValue) {
+                let started = false;
+                return points.map((point) => {
+                    if (point?.missing) {
+                        started = false;
+                        return "";
+                    }
+                    const x = padding.left + ((width - padding.left - padding.right) * Number(point.position || 0));
+                    const rawValue = Number(point.count || 0);
+                    const y = height - padding.bottom - ((height - padding.top - padding.bottom) * rawValue / Math.max(maxValue, 1));
+                    const command = started ? "L" : "M";
+                    started = true;
+                    return `${command} ${x.toFixed(2)} ${y.toFixed(2)}`;
+                }).filter(Boolean).join(" ");
+            }
+
+            function renderShortageLegend(seriesEntries) {
+                if (!shortageLegendEl) {
+                    return;
+                }
+                if (!seriesEntries.length) {
+                    shortageLegendEl.innerHTML = "";
+                    return;
+                }
+                shortageLegendEl.innerHTML = seriesEntries.map(([fuelType]) => `
+                    <span class="chart-legend-item">
+                        <i class="chart-legend-swatch" style="--swatch:${escapeHtml(shortageSeriesColors[fuelType] || "#64d3ff")}"></i>
+                        ${escapeHtml(displayFuelName(fuelType))}
+                    </span>
+                `).join("");
+            }
+
+            function renderShortageChart() {
+                if (!shortageChartEl) {
+                    return;
+                }
+                const chartConfig = getChartConfig("shortage");
+                const shortageChartWidth = chartConfig.width;
+                const shortageChartHeight = chartConfig.height;
+                const shortagePadding = chartConfig.padding;
+                setChartViewport(shortageChartEl, chartConfig);
+                const allSeries = fuelwisePayload.time_series?.series || {};
+                const selectedFuelType = fuelwisePayload.filters?.fuel_type || "all";
+                const normalizedSelectedFuelType = selectedFuelType === "SP95" ? "E10" : selectedFuelType;
+                const visibleFuelTypes = (normalizedSelectedFuelType === "all"
+                    ? (fuelwisePayload.time_series?.fuel_types || [])
+                    : [normalizedSelectedFuelType]
+                ).filter((fuelType) => fuelType !== "SP95" && Array.isArray(allSeries[fuelType]) && allSeries[fuelType].length);
+                const visibleSeries = visibleFuelTypes.map((fuelType) => [fuelType, allSeries[fuelType]]);
+                const summarySeries = (
+                    normalizedSelectedFuelType === "all"
+                        ? (Array.isArray(allSeries.all) && allSeries.all.length ? allSeries.all : visibleSeries[0]?.[1])
+                        : (allSeries[normalizedSelectedFuelType] || visibleSeries[0]?.[1])
+                ) || [];
+                const totalStations = Number(fuelwisePayload.summary?.total_stations || 0);
+
+                if (!visibleSeries.length || !summarySeries.length) {
+                    shortageChartEl.innerHTML = "";
+                    shortageChartEl.setAttribute("hidden", "hidden");
+                    shortageEmptyEl.hidden = false;
+                    if (shortageTooltipEl) {
+                        shortageTooltipEl.hidden = true;
+                    }
+                    renderShortageLegend([]);
+                    shortageValueEl.textContent = "0";
+                    shortageChangeEl.textContent = "0%";
+                    return;
+                }
+
+                shortageChartEl.removeAttribute("hidden");
+                shortageEmptyEl.hidden = true;
+                renderShortageLegend(visibleSeries);
+
+                const summaryDates = summarySeries.map((point) => point.date).filter(Boolean);
+                const dates = (summaryDates.length
+                    ? summaryDates
+                    : Array.from(new Set(
+                        visibleSeries.flatMap(([, points]) => points.map((point) => point.date)).filter(Boolean)
+                    )).sort()
+                );
+                const dateCount = dates.length;
+
+                if (!dateCount) {
+                    shortageChartEl.innerHTML = "";
+                    shortageChartEl.setAttribute("hidden", "hidden");
+                    shortageEmptyEl.hidden = false;
+                    if (shortageTooltipEl) {
+                        shortageTooltipEl.hidden = true;
+                    }
+                    renderShortageLegend([]);
+                    shortageValueEl.textContent = "0";
+                    shortageChangeEl.textContent = "0%";
+                    return;
+                }
+
+                const chartSeries = visibleSeries.map(([fuelType, points]) => {
+                    const pointMap = new Map(points.map((point) => [point.date, point]));
+                    return [
+                        fuelType,
+                        dates.map((date, index) => {
+                            const sourcePoint = pointMap.get(date);
+                            return {
+                                date,
+                                count: Number(sourcePoint?.count || 0),
+                                percentage: Number(sourcePoint?.percentage || 0),
+                                missing: !sourcePoint,
+                                position: dateCount === 1 ? 0.5 : index / Math.max(dateCount - 1, 1)
+                            };
+                        })
+                    ];
+                });
+
+                const values = chartSeries.flatMap(([, points]) => points.filter((point) => !point.missing).map((point) => point.count));
+                const maxValue = Math.max(...values, 1);
+                const latest = summarySeries[summarySeries.length - 1];
+                shortageValueEl.textContent = formatShortageValue(latest?.count, totalStations);
+                shortageChangeEl.textContent = formatPercentChange(
+                    Number(summarySeries[0]?.count || 0),
+                    Number(latest?.count || 0)
+                );
+
+                const yTicks = chartConfig.ySteps.map((step) => {
+                    const value = maxValue * step;
+                    const y = shortageChartHeight - shortagePadding.bottom - ((shortageChartHeight - shortagePadding.top - shortagePadding.bottom) * step);
+                    const percentage = totalStations ? (value / totalStations) * 100 : 0;
+                    return `
+                        <g class="chart-tick">
+                            <line x1="${shortagePadding.left}" y1="${y}" x2="${shortageChartWidth - shortagePadding.right}" y2="${y}" />
+                            <text x="${shortagePadding.left - 10}" y="${y + 4}" text-anchor="end">${Math.round(value)}</text>
+                            <text x="${shortageChartWidth - shortagePadding.right + 10}" y="${y + 4}" text-anchor="start">${percentage.toFixed(1)}%</text>
+                        </g>
+                    `;
+                }).join("");
+
+                const labelStep = getVisibleLabelStep(dates.length, chartConfig.xTickCount);
+                const xLabels = dates.map((date, index) => {
+                    if (index % labelStep !== 0 && index !== dates.length - 1) {
+                        return "";
+                    }
+                    const ratio = dateCount === 1 ? 0.5 : index / Math.max(dateCount - 1, 1);
+                    const x = shortagePadding.left + ((shortageChartWidth - shortagePadding.left - shortagePadding.right) * ratio);
+                    return `<text class="chart-x-label" x="${x}" y="${shortageChartHeight - 14}" text-anchor="middle">${escapeHtml(formatChartDateLabel(date))}</text>`;
+                }).join("");
+                const axisLabelY = (shortageChartHeight - shortagePadding.bottom + shortagePadding.top) / 2;
+                const axisLabels = chartConfig.showAxisLabels
+                    ? `
+                        <text class="chart-axis-label" x="18" y="${axisLabelY}" text-anchor="middle" transform="rotate(-90 18 ${axisLabelY})">${escapeHtml(shortageAxisLabels.left)}</text>
+                        <text class="chart-axis-label" x="${shortageChartWidth - 18}" y="${axisLabelY}" text-anchor="middle" transform="rotate(90 ${shortageChartWidth - 18} ${axisLabelY})">${escapeHtml(shortageAxisLabels.right)}</text>
+                    `
+                    : "";
+
+                const lineMarkup = chartSeries.map(([fuelType, points]) => `
+                    <path
+                        class="chart-line chart-line-shortage"
+                        d="${buildChartPath(points, shortageChartWidth, shortageChartHeight, shortagePadding, maxValue)}"
+                        style="--line-color:${escapeHtml(shortageSeriesColors[fuelType] || "#64d3ff")}"
+                    />
+                `).join("");
+
+                const hoverTargets = dates.map((date, index) => {
+                    const leftRatio = dateCount === 1 ? 0 : Math.max((index - 0.5) / Math.max(dateCount - 1, 1), 0);
+                    const rightRatio = dateCount === 1 ? 1 : Math.min((index + 0.5) / Math.max(dateCount - 1, 1), 1);
+                    const x = shortagePadding.left + ((shortageChartWidth - shortagePadding.left - shortagePadding.right) * (dateCount === 1 ? 0.5 : index / Math.max(dateCount - 1, 1)));
+                    const rectX = shortagePadding.left + ((shortageChartWidth - shortagePadding.left - shortagePadding.right) * leftRatio);
+                    const rectWidth = Math.max(
+                        18,
+                        ((shortageChartWidth - shortagePadding.left - shortagePadding.right) * (rightRatio - leftRatio))
+                    );
+                    return `
+                        <g class="chart-hover-target" data-index="${index}">
+                            <rect x="${rectX}" y="${shortagePadding.top}" width="${rectWidth}" height="${shortageChartHeight - shortagePadding.top - shortagePadding.bottom}" fill="transparent"></rect>
+                            <line class="chart-hover-line" x1="${x}" y1="${shortagePadding.top}" x2="${x}" y2="${shortageChartHeight - shortagePadding.bottom}" />
+                        </g>
+                    `;
+                }).join("");
+
+                shortageChartEl.innerHTML = `
+                    ${yTicks}
+                    ${axisLabels}
+                    ${lineMarkup}
+                    <g id="fuelwise-shortage-active-points"></g>
+                    ${hoverTargets}
+                    ${xLabels}
+                `;
+
+                const activePointsEl = shortageChartEl.querySelector("#fuelwise-shortage-active-points");
+                const hoverTargetEls = shortageChartEl.querySelectorAll(".chart-hover-target");
+
+                function hideShortageTooltip() {
+                    hoverTargetEls.forEach((targetEl) => targetEl.classList.remove("is-active"));
+                    if (activePointsEl) {
+                        activePointsEl.innerHTML = "";
+                    }
+                    if (shortageTooltipEl) {
+                        shortageTooltipEl.hidden = true;
+                        shortageTooltipEl.classList.remove("chart-tooltip-below", "chart-tooltip-above");
+                    }
+                }
+
+                function showShortageTooltip(index) {
+                    const activeDate = dates[index];
+                    if (!activeDate) {
+                        hideShortageTooltip();
+                        return;
+                    }
+                    hoverTargetEls.forEach((targetEl) => {
+                        targetEl.classList.toggle("is-active", Number(targetEl.dataset.index) === index);
+                    });
+
+                    const ratio = dateCount === 1 ? 0.5 : index / Math.max(dateCount - 1, 1);
+                    const x = shortagePadding.left + ((shortageChartWidth - shortagePadding.left - shortagePadding.right) * ratio);
+                    const visibleRows = chartSeries
+                        .map(([fuelType, points]) => [fuelType, points[index]])
+                        .filter(([, point]) => point && !point.missing);
+                    const pointMarkup = visibleRows.map(([fuelType, point]) => {
+                        const y = shortageChartHeight - shortagePadding.bottom - ((shortageChartHeight - shortagePadding.top - shortagePadding.bottom) * Number(point.count || 0) / Math.max(maxValue, 1));
+                        return `
+                            <circle
+                                class="chart-point chart-point-shortage"
+                                cx="${x}"
+                                cy="${y}"
+                                r="${chartConfig.pointRadius}"
+                                style="--point-color:${escapeHtml(shortageSeriesColors[fuelType] || "#64d3ff")}"
+                            ></circle>
+                        `;
+                    }).join("");
+                    if (activePointsEl) {
+                        activePointsEl.innerHTML = pointMarkup;
+                    }
+                    if (!visibleRows.length) {
+                        hideShortageTooltip();
+                        return;
+                    }
+
+                    if (!shortageTooltipEl) {
+                        return;
+                    }
+                    const rows = visibleRows.map(([fuelType, point]) => {
+                        return `
+                            <span class="chart-tooltip-row">
+                                <i class="chart-legend-swatch" style="--swatch:${escapeHtml(shortageSeriesColors[fuelType] || "#64d3ff")}"></i>
+                                ${escapeHtml(displayFuelName(fuelType))}: ${escapeHtml(formatShortageValue(point?.count, totalStations))}
+                            </span>
+                        `;
+                    }).join("");
+                    shortageTooltipEl.hidden = false;
+                    shortageTooltipEl.innerHTML = `
+                        <strong>${escapeHtml(activeDate)}</strong>
+                        ${rows}
+                    `;
+                    shortageTooltipEl.style.left = `${Math.min(Math.max((x / shortageChartWidth) * 100, chartConfig.tooltipBounds.min), chartConfig.tooltipBounds.max)}%`;
+
+                    const topPoint = visibleRows.reduce((minY, [, point]) => {
+                        const y = shortageChartHeight - shortagePadding.bottom - ((shortageChartHeight - shortagePadding.top - shortagePadding.bottom) * Number(point?.count || 0) / Math.max(maxValue, 1));
+                        return Math.min(minY, y);
+                    }, shortageChartHeight - shortagePadding.bottom);
+                    const tooltipHeight = shortageTooltipEl.offsetHeight || 96;
+                    const spaceAbove = topPoint - shortagePadding.top;
+                    const spaceBelow = (shortageChartHeight - shortagePadding.bottom) - topPoint;
+                    const prefersBelow = spaceAbove < (tooltipHeight + 24) && spaceBelow > spaceAbove;
+                    shortageTooltipEl.classList.toggle("chart-tooltip-below", prefersBelow);
+                    shortageTooltipEl.classList.toggle("chart-tooltip-above", !prefersBelow);
+                    const anchorY = prefersBelow
+                        ? Math.min(topPoint, shortageChartHeight - shortagePadding.bottom - tooltipHeight - 24)
+                        : Math.max(topPoint, shortagePadding.top + tooltipHeight + 24);
+                    shortageTooltipEl.style.top = `${anchorY}px`;
+                }
+
+                hoverTargetEls.forEach((targetEl) => {
+                    const index = Number(targetEl.dataset.index);
+                    targetEl.addEventListener("mouseenter", () => showShortageTooltip(index));
+                    targetEl.addEventListener("mousemove", () => showShortageTooltip(index));
+                    targetEl.addEventListener("click", () => showShortageTooltip(index));
+                });
+                shortageChartEl.addEventListener("mouseleave", hideShortageTooltip);
+            }
+
+            function formatPrice(value) {
+                if (value === null || value === undefined || Number.isNaN(Number(value))) {
+                    return "-";
+                }
+                return `${Number(value).toFixed(3)} €/L`;
+            }
+
+            function formatPriceDelta(value) {
+                if (value === null || value === undefined || Number.isNaN(Number(value))) {
+                    return "-";
+                }
+                const prefix = Number(value) > 0 ? "+" : "";
+                return `${prefix}${Number(value).toFixed(3)} €/L`;
+            }
+
+            function renderPriceLegend(seriesEntries) {
+                if (!priceLegendEl) {
+                    return;
+                }
+                if (!seriesEntries.length) {
+                    priceLegendEl.innerHTML = "";
+                    return;
+                }
+                priceLegendEl.innerHTML = seriesEntries.map(([fuelType]) => `
+                    <span class="chart-legend-item">
+                        <i class="chart-legend-swatch" style="--swatch:${escapeHtml(shortageSeriesColors[fuelType] || "#64d3ff")}"></i>
+                        ${escapeHtml(displayFuelName(fuelType))}
+                    </span>
+                `).join("");
+            }
+
+            function renderPriceChart() {
+                if (!priceChartEl) {
+                    return;
+                }
+                const chartConfig = getChartConfig("price");
+                const priceChartWidth = chartConfig.width;
+                const priceChartHeight = chartConfig.height;
+                const pricePadding = chartConfig.padding;
+                setChartViewport(priceChartEl, chartConfig);
+                const priceTrend = fuelwisePayload.price_trend || { points: [], series: {} };
+                const selectedFuelType = fuelwisePayload.filters?.fuel_type || "all";
+                const normalizedSelectedFuelType = selectedFuelType === "SP95" ? "E10" : selectedFuelType;
+                const allSeries = priceTrend.series || {};
+                const visibleFuelTypes = (normalizedSelectedFuelType === "all"
+                    ? (priceTrend.fuel_types || [])
+                    : [normalizedSelectedFuelType]
+                ).filter((fuelType) => fuelType !== "SP95" && Array.isArray(allSeries[fuelType]) && allSeries[fuelType].length);
+                const visibleSeries = visibleFuelTypes.map((fuelType) => [fuelType, allSeries[fuelType]]);
+                const summaryPoints = Array.isArray(priceTrend.points) ? priceTrend.points : [];
+
+                priceValueEl.textContent = formatPrice(priceTrend.latest_price);
+                priceChangeEl.textContent = formatPriceDelta(priceTrend.latest_change);
+                pricePeriodChangeEl.textContent = summaryPoints.length
+                    ? formatPercentChange(Number(summaryPoints[0].price || 0), Number(summaryPoints[summaryPoints.length - 1].price || 0))
+                    : "0%";
+
+                if (!visibleSeries.length || !summaryPoints.length) {
+                    priceChartEl.innerHTML = "";
+                    priceChartEl.setAttribute("hidden", "hidden");
+                    priceEmptyEl.hidden = false;
+                    priceTooltipEl.hidden = true;
+                    renderPriceLegend([]);
+                    return;
+                }
+
+                priceChartEl.removeAttribute("hidden");
+                priceEmptyEl.hidden = true;
+                renderPriceLegend(visibleSeries);
+
+                const dates = Array.from(new Set(
+                    visibleSeries.flatMap(([, points]) => points.map((point) => point.date)).filter(Boolean)
+                )).sort();
+                const dateCount = dates.length;
+                const chartSeries = visibleSeries.map(([fuelType, points]) => {
+                    const pointMap = new Map(points.map((point) => [point.date, point]));
+                    return [
+                        fuelType,
+                        dates.map((date, index) => {
+                            const sourcePoint = pointMap.get(date);
+                            return {
+                                date,
+                                price: Number(sourcePoint?.price || 0),
+                                missing: !sourcePoint,
+                                position: dateCount === 1 ? 0.5 : index / Math.max(dateCount - 1, 1)
+                            };
+                        })
+                    ];
+                });
+
+                const values = chartSeries.flatMap(([, points]) => points.filter((point) => !point.missing).map((point) => Number(point.price || 0)));
+                const minValue = Math.min(...values);
+                const maxValue = Math.max(...values);
+                const valueRange = Math.max(maxValue - minValue, 0.0001);
+                const lineMarkup = chartSeries.map(([fuelType, points]) => {
+                    let started = false;
+                    const path = points.map((point) => {
+                        if (point.missing) {
+                            started = false;
+                            return "";
+                        }
+                        const x = pricePadding.left + ((priceChartWidth - pricePadding.left - pricePadding.right) * Number(point.position || 0));
+                        const ratio = (Number(point.price || 0) - minValue) / valueRange;
+                        const y = priceChartHeight - pricePadding.bottom - ((priceChartHeight - pricePadding.top - pricePadding.bottom) * ratio);
+                        const command = started ? "L" : "M";
+                        started = true;
+                        return `${command} ${x.toFixed(2)} ${y.toFixed(2)}`;
+                    }).filter(Boolean).join(" ");
+                    return `
+                        <path
+                            class="chart-line chart-line-price-series"
+                            d="${path}"
+                            style="--line-color:${escapeHtml(shortageSeriesColors[fuelType] || "#64d3ff")}"
+                        />
+                    `;
+                }).join("");
+
+                const labelStep = getVisibleLabelStep(dates.length, chartConfig.xTickCount);
+                const xLabels = dates.map((date, index) => {
+                    if (index % labelStep !== 0 && index !== dates.length - 1) {
+                        return "";
+                    }
+                    const x = pricePadding.left + ((priceChartWidth - pricePadding.left - pricePadding.right) * (dateCount === 1 ? 0.5 : index / Math.max(dateCount - 1, 1)));
+                    return `<text class="chart-x-label" x="${x}" y="${priceChartHeight - 14}" text-anchor="middle">${escapeHtml(formatChartDateLabel(date))}</text>`;
+                }).join("");
+
+                const yTicks = chartConfig.ySteps.map((step) => {
+                    const value = minValue + (valueRange * step);
+                    const y = priceChartHeight - pricePadding.bottom - ((priceChartHeight - pricePadding.top - pricePadding.bottom) * step);
+                    return `
+                        <g class="chart-tick">
+                            <line x1="${pricePadding.left}" y1="${y}" x2="${priceChartWidth - pricePadding.right}" y2="${y}" />
+                            <text x="${pricePadding.left - 10}" y="${y + 4}" text-anchor="end">${value.toFixed(3)}</text>
+                        </g>
+                    `;
+                }).join("");
+
+                const hoverTargets = dates.map((date, index) => {
+                    const leftRatio = dateCount === 1 ? 0 : Math.max((index - 0.5) / Math.max(dateCount - 1, 1), 0);
+                    const rightRatio = dateCount === 1 ? 1 : Math.min((index + 0.5) / Math.max(dateCount - 1, 1), 1);
+                    const x = pricePadding.left + ((priceChartWidth - pricePadding.left - pricePadding.right) * (dateCount === 1 ? 0.5 : index / Math.max(dateCount - 1, 1)));
+                    const rectX = pricePadding.left + ((priceChartWidth - pricePadding.left - pricePadding.right) * leftRatio);
+                    const rectWidth = Math.max(18, ((priceChartWidth - pricePadding.left - pricePadding.right) * (rightRatio - leftRatio)));
+                    return `
+                        <g class="chart-hover-target" data-index="${index}">
+                            <rect x="${rectX}" y="${pricePadding.top}" width="${rectWidth}" height="${priceChartHeight - pricePadding.top - pricePadding.bottom}" fill="transparent"></rect>
+                            <line class="chart-hover-line" x1="${x}" y1="${pricePadding.top}" x2="${x}" y2="${priceChartHeight - pricePadding.bottom}" />
+                        </g>
+                    `;
+                }).join("");
+
+                priceChartEl.innerHTML = `
+                    ${yTicks}
+                    ${lineMarkup}
+                    <g id="fuelwise-price-active-points"></g>
+                    ${hoverTargets}
+                    ${xLabels}
+                `;
+
+                const activePointsEl = priceChartEl.querySelector("#fuelwise-price-active-points");
+                const hoverTargetEls = priceChartEl.querySelectorAll(".chart-hover-target");
+
+                function hidePriceTooltip() {
+                    hoverTargetEls.forEach((targetEl) => targetEl.classList.remove("is-active"));
+                    if (activePointsEl) {
+                        activePointsEl.innerHTML = "";
+                    }
+                    if (priceTooltipEl) {
+                        priceTooltipEl.hidden = true;
+                        priceTooltipEl.classList.remove("chart-tooltip-below", "chart-tooltip-above");
+                    }
+                }
+
+                function showPriceTooltip(index) {
+                    const activeDate = dates[index];
+                    if (!activeDate || !priceTooltipEl) {
+                        hidePriceTooltip();
+                        return;
+                    }
+                    hoverTargetEls.forEach((targetEl) => {
+                        targetEl.classList.toggle("is-active", Number(targetEl.dataset.index) === index);
+                    });
+                    const ratio = dateCount === 1 ? 0.5 : index / Math.max(dateCount - 1, 1);
+                    const x = pricePadding.left + ((priceChartWidth - pricePadding.left - pricePadding.right) * ratio);
+                    const visibleRows = chartSeries
+                        .map(([fuelType, points]) => [fuelType, points[index]])
+                        .filter(([, point]) => point && !point.missing);
+                    const pointMarkup = visibleRows.map(([fuelType, point]) => {
+                        const y = priceChartHeight - pricePadding.bottom - ((priceChartHeight - pricePadding.top - pricePadding.bottom) * ((Number(point.price || 0) - minValue) / valueRange));
+                        return `
+                            <circle
+                                class="chart-point chart-point-shortage"
+                                cx="${x}"
+                                cy="${y}"
+                                r="${chartConfig.pointRadius}"
+                                style="--point-color:${escapeHtml(shortageSeriesColors[fuelType] || "#64d3ff")}"
+                            ></circle>
+                        `;
+                    }).join("");
+                    if (activePointsEl) {
+                        activePointsEl.innerHTML = pointMarkup;
+                    }
+
+                    const rows = visibleRows.map(([fuelType, point]) => `
+                        <span class="chart-tooltip-row">
+                            <i class="chart-legend-swatch" style="--swatch:${escapeHtml(shortageSeriesColors[fuelType] || "#64d3ff")}"></i>
+                            ${escapeHtml(displayFuelName(fuelType))}: ${escapeHtml(formatPrice(point.price))}
+                        </span>
+                    `).join("");
+                    priceTooltipEl.hidden = false;
+                    priceTooltipEl.innerHTML = `
+                        <strong>${escapeHtml(priceTrend.area_name || fuelwiseCopy.prices.all_france)}</strong>
+                        <span>${escapeHtml(fuelwiseCopy.prices.tooltip_date)}: ${escapeHtml(activeDate)}</span>
+                        ${rows}
+                    `;
+                    priceTooltipEl.style.left = `${Math.min(Math.max((x / priceChartWidth) * 100, chartConfig.tooltipBounds.min), chartConfig.tooltipBounds.max)}%`;
+
+                    const topPoint = visibleRows.reduce((minY, [, point]) => {
+                        const y = priceChartHeight - pricePadding.bottom - ((priceChartHeight - pricePadding.top - pricePadding.bottom) * ((Number(point.price || 0) - minValue) / valueRange));
+                        return Math.min(minY, y);
+                    }, priceChartHeight - pricePadding.bottom);
+                    const tooltipHeight = priceTooltipEl.offsetHeight || 96;
+                    const spaceAbove = topPoint - pricePadding.top;
+                    const spaceBelow = (priceChartHeight - pricePadding.bottom) - topPoint;
+                    const prefersBelow = spaceAbove < (tooltipHeight + 24) && spaceBelow > spaceAbove;
+                    priceTooltipEl.classList.toggle("chart-tooltip-below", prefersBelow);
+                    priceTooltipEl.classList.toggle("chart-tooltip-above", !prefersBelow);
+                    const anchorY = prefersBelow
+                        ? Math.min(topPoint, priceChartHeight - pricePadding.bottom - tooltipHeight - 24)
+                        : Math.max(topPoint, pricePadding.top + tooltipHeight + 24);
+                    priceTooltipEl.style.top = `${anchorY}px`;
+                }
+
+                hoverTargetEls.forEach((targetEl) => {
+                    const index = Number(targetEl.dataset.index);
+                    targetEl.addEventListener("mouseenter", () => showPriceTooltip(index));
+                    targetEl.addEventListener("mousemove", () => showPriceTooltip(index));
+                    targetEl.addEventListener("click", () => showPriceTooltip(index));
+                });
+                priceChartEl.addEventListener("mouseleave", hidePriceTooltip);
+            }
+
+            function renderStationChart(payload) {
+                if (!stationChartEl) {
+                    return;
+                }
+                currentStationTrendPayload = payload;
+                const chartConfig = getChartConfig("station");
+                const stationChartWidth = chartConfig.width;
+                const stationChartHeight = chartConfig.height;
+                const stationPadding = chartConfig.padding;
+                setChartViewport(stationChartEl, chartConfig);
+                const series = Array.isArray(payload?.series) ? payload.series : [];
+                const fuelTypes = (Array.isArray(payload?.fuel_types) ? payload.fuel_types : []).filter((fuelType) => fuelType !== "SP95");
+                const maxTotal = Math.max(...series.map((item) => Number(item.total || 0)), 1);
+
+                renderStationLegend(fuelTypes);
+                if (stationChartValueEl) {
+                    stationChartValueEl.textContent = formatInteger(payload?.totals?.latest_total || 0);
+                }
+                if (stationChartTotalEl) {
+                    stationChartTotalEl.textContent = formatInteger(payload?.totals?.period_total || 0);
+                }
+
+                if (!series.length || !fuelTypes.length || !series.some((item) => Number(item.total || 0) > 0)) {
+                    stationChartEl.innerHTML = "";
+                    stationChartEl.setAttribute("hidden", "hidden");
+                    stationChartEmptyEl.hidden = false;
+                    stationChartEmptyEl.textContent = fuelwiseCopy.station_chart.no_data;
+                    if (stationChartTooltipEl) {
+                        stationChartTooltipEl.hidden = true;
+                    }
+                    return;
+                }
+
+                stationChartEl.removeAttribute("hidden");
+                stationChartEmptyEl.hidden = true;
+
+                const plotWidth = stationChartWidth - stationPadding.left - stationPadding.right;
+                const stepWidth = plotWidth / Math.max(series.length, 1);
+                const barWidth = Math.max(8, Math.min(24, stepWidth * 0.72));
+                const yTicks = chartConfig.ySteps.map((step) => {
+                    const value = maxTotal * step;
+                    const y = stationChartHeight - stationPadding.bottom - ((stationChartHeight - stationPadding.top - stationPadding.bottom) * step);
+                    return `
+                        <g class="chart-tick">
+                            <line x1="${stationPadding.left}" y1="${y}" x2="${stationChartWidth - stationPadding.right}" y2="${y}" />
+                            <text x="${stationPadding.left - 10}" y="${y + 4}" text-anchor="end">${Math.round(value)}</text>
+                        </g>
+                    `;
+                }).join("");
+
+                const labelStep = getVisibleLabelStep(series.length, chartConfig.xTickCount);
+                const xLabels = series.map((point, index) => {
+                    if (index % labelStep !== 0 && index !== series.length - 1) {
+                        return "";
+                    }
+                    const x = stationPadding.left + (stepWidth * index) + (stepWidth / 2);
+                    return `<text class="chart-x-label" x="${x}" y="${stationChartHeight - 14}" text-anchor="middle">${escapeHtml(formatChartDateLabel(point.date))}</text>`;
+                }).join("");
+
+                const barMarkup = series.map((point, index) => {
+                    const x = stationPadding.left + (stepWidth * index) + ((stepWidth - barWidth) / 2);
+                    let runningHeight = 0;
+                    const segments = fuelTypes.map((fuelType) => {
+                        const value = Number(point.segments?.[fuelType] || 0);
+                        if (!value) {
+                            return "";
+                        }
+                        const segmentHeight = ((stationChartHeight - stationPadding.top - stationPadding.bottom) * value) / Math.max(maxTotal, 1);
+                        const y = stationChartHeight - stationPadding.bottom - runningHeight - segmentHeight;
+                        runningHeight += segmentHeight;
+                        return `
+                            <rect
+                                x="${x}"
+                                y="${y}"
+                                width="${barWidth}"
+                                height="${segmentHeight}"
+                                rx="4"
+                                ry="4"
+                                fill="${escapeHtml(stationSeriesColors[fuelType] || stationSeriesColors.Unknown)}"
+                            ></rect>
+                        `;
+                    }).join("");
+                    return `
+                        <g class="station-bar-group" data-index="${index}">
+                            ${segments}
+                            <rect class="station-bar-hover" x="${x - Math.max((stepWidth - barWidth) / 2, 4)}" y="${stationPadding.top}" width="${Math.max(stepWidth, barWidth + 8)}" height="${stationChartHeight - stationPadding.top - stationPadding.bottom}" fill="transparent"></rect>
+                        </g>
+                    `;
+                }).join("");
+
+                stationChartEl.innerHTML = `
+                    ${yTicks}
+                    ${barMarkup}
+                    ${xLabels}
+                `;
+
+                const barGroups = stationChartEl.querySelectorAll(".station-bar-group");
+
+                function hideStationTooltip() {
+                    barGroups.forEach((groupEl) => groupEl.classList.remove("is-active"));
+                    if (stationChartTooltipEl) {
+                        stationChartTooltipEl.hidden = true;
+                    }
+                }
+
+                function showStationTooltip(index) {
+                    const point = series[index];
+                    if (!point || !stationChartTooltipEl) {
+                        hideStationTooltip();
+                        return;
+                    }
+                    barGroups.forEach((groupEl) => {
+                        groupEl.classList.toggle("is-active", Number(groupEl.dataset.index) === index);
+                    });
+                    const rows = fuelTypes
+                        .filter((fuelType) => Number(point.segments?.[fuelType] || 0) > 0)
+                        .map((fuelType) => `
+                            <span class="chart-tooltip-row">
+                                <i class="chart-legend-swatch" style="--swatch:${escapeHtml(stationSeriesColors[fuelType] || stationSeriesColors.Unknown)}"></i>
+                                ${escapeHtml(displayFuelName(fuelType))}: ${escapeHtml(formatInteger(point.segments?.[fuelType] || 0))}
+                            </span>
+                        `)
+                        .join("");
+                    stationChartTooltipEl.hidden = false;
+                    stationChartTooltipEl.innerHTML = `
+                        <strong>${escapeHtml(point.date || "")}</strong>
+                        <span>${escapeHtml(fuelwiseCopy.station_chart.tooltip_total)}: ${escapeHtml(formatInteger(point.total || 0))}</span>
+                        ${rows}
+                    `;
+                    const x = stationPadding.left + (stepWidth * index) + (stepWidth / 2);
+                    const y = stationChartHeight - stationPadding.bottom - (((stationChartHeight - stationPadding.top - stationPadding.bottom) * Number(point.total || 0)) / Math.max(maxTotal, 1));
+                    stationChartTooltipEl.style.left = `${Math.min(Math.max((x / stationChartWidth) * 100, chartConfig.tooltipBounds.min), chartConfig.tooltipBounds.max)}%`;
+                    stationChartTooltipEl.style.top = `${Math.min(Math.max((y / stationChartHeight) * 100, 16), 76)}%`;
+                }
+
+                barGroups.forEach((groupEl) => {
+                    const index = Number(groupEl.dataset.index);
+                    groupEl.addEventListener("mouseenter", () => showStationTooltip(index));
+                    groupEl.addEventListener("mousemove", () => showStationTooltip(index));
+                    groupEl.addEventListener("click", () => showStationTooltip(index));
+                });
+                stationChartEl.addEventListener("mouseleave", hideStationTooltip);
+            }
+
+            const mapController = (function createMapController() {
+                const mapEl = document.getElementById("fuelwise-france-map");
+                const loadingEl = document.getElementById("fuelwise-map-loading");
+                if (!mapEl) {
+                    return { observe() {}, setStations() {} };
+                }
+
+                let started = false;
+                let map = null;
+                let markerLayer = null;
+                let stations = Array.isArray(fuelwisePayload.rupture_map_stations) ? fuelwisePayload.rupture_map_stations : [];
+                let markerRequest = null;
+                let moveFetchTimer = null;
+                let skipNextMoveFetch = false;
+
+                function loadStylesheet(href) {
+                    return new Promise((resolve, reject) => {
+                        const existing = document.querySelector(`link[href="${href}"]`);
+                        if (existing) {
+                            resolve();
+                            return;
+                        }
+                        const link = document.createElement("link");
+                        link.rel = "stylesheet";
+                        link.href = href;
+                        link.crossOrigin = "";
+                        link.onload = resolve;
+                        link.onerror = reject;
+                        document.head.appendChild(link);
+                    });
+                }
+
+                function loadScript(src) {
+                    return new Promise((resolve, reject) => {
+                        if (window.L) {
+                            resolve();
+                            return;
+                        }
+                        const script = document.createElement("script");
+                        script.src = src;
+                        script.crossOrigin = "";
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.body.appendChild(script);
+                    });
+                }
+
+                function drawMarkers({ fitToMarkers = false } = {}) {
+                    if (!map || !markerLayer || !window.L) {
+                        return;
+                    }
+                    markerLayer.clearLayers();
+                    const franceBounds = L.latLngBounds(L.latLng(41.0, -5.7), L.latLng(51.5, 9.8));
+                    const stationBounds = [];
+                    const colorByStatus = {
+                        critical: "#ff6b57",
+                        warning: "#ffbf47",
+                        stable: "#46d29e"
+                    };
+
+                    stations.forEach((station) => {
+                        if (typeof station.lat !== "number" || typeof station.lng !== "number") {
+                            return;
+                        }
+                        const latLng = [station.lat, station.lng];
+                        stationBounds.push(latLng);
+                        const fuels = Array.isArray(station.fuel_list) ? station.fuel_list.join(", ") : "";
+                        const marker = L.circleMarker(latLng, {
+                            radius: Math.max(6, Math.min(14, 5 + Number(station.fuel_count || 1) * 2)),
+                            color: colorByStatus[station.status_level] || colorByStatus.stable,
+                            weight: 2,
+                            fillColor: colorByStatus[station.status_level] || colorByStatus.stable,
+                            fillOpacity: 0.45
+                        });
+                        marker.bindPopup(`
+                            <div class="fuelwise-popup">
+                                <strong>${escapeHtml(station.name || fuelwiseCopy.common_station)}</strong>
+                                <div>${escapeHtml(station.city || "")}</div>
+                                ${station.address ? `<div>${escapeHtml(station.address)}</div>` : ""}
+                                ${fuels ? `<div><b>${escapeHtml(fuelwiseCopy.map.popup_label)}:</b> ${escapeHtml(fuels)}</div>` : ""}
+                            </div>
+                        `);
+                        marker.on("click", () => {
+                            focusStationFromMap(station);
+                        });
+                        marker.addTo(markerLayer);
+                    });
+
+                    if (fitToMarkers) {
+                        skipNextMoveFetch = true;
+                        if (stationBounds.length) {
+                            map.fitBounds(L.latLngBounds(stationBounds).pad(0.18));
+                        } else {
+                            map.fitBounds(franceBounds);
+                        }
+                    }
+                    if (loadingEl) {
+                        loadingEl.hidden = true;
+                    }
+                }
+
+                async function fetchVisibleStations({ fitToMarkers = false } = {}) {
+                    if (!map) {
+                        return;
+                    }
+                    if (markerRequest) {
+                        markerRequest.abort();
+                    }
+                    const requestController = new AbortController();
+                    markerRequest = requestController;
+                    const params = new URLSearchParams({
+                        source_type: fuelwisePayload.snapshot_source_type || "official",
+                        snapshot_date: fuelwisePayload.latest_snapshot_date || "",
+                        fuel_type: fuelwisePayload.filters?.fuel_type || "all",
+                        limit: "1500"
+                    });
+                    if (fuelwisePayload.filters?.department_code) {
+                        params.set("department_code", fuelwisePayload.filters.department_code);
+                    }
+                    const bounds = map.getBounds?.();
+                    if (bounds && bounds.isValid()) {
+                        params.set("lat_min", String(bounds.getSouth()));
+                        params.set("lat_max", String(bounds.getNorth()));
+                        params.set("lng_min", String(bounds.getWest()));
+                        params.set("lng_max", String(bounds.getEast()));
+                    }
+                    if (loadingEl) {
+                        loadingEl.hidden = false;
+                        loadingEl.textContent = fuelwiseCopy.map.loading;
+                    }
+                    try {
+                        const response = await fetch(`${fuelwiseUrls.mapMarkers}?${params.toString()}`, {
+                            headers: { "Accept": "application/json" },
+                            signal: requestController.signal
+                        });
+                        if (!response.ok) {
+                            throw new Error(`Request failed with ${response.status}`);
+                        }
+                        const payload = await response.json();
+                        stations = Array.isArray(payload.stations) ? payload.stations : [];
+                        drawMarkers({ fitToMarkers });
+                    } catch (error) {
+                        if (error.name === "AbortError") {
+                            return;
+                        }
+                        console.error("fuelwise map markers failed", error);
+                        if (loadingEl) {
+                            loadingEl.hidden = false;
+                            loadingEl.textContent = fuelwiseCopy.map.failed;
+                        }
+                    } finally {
+                        if (markerRequest === requestController) {
+                            markerRequest = null;
+                        }
+                    }
+                }
+
+                function scheduleVisibleStationFetch(options = {}) {
+                    if (!started || !map) {
+                        return;
+                    }
+                    if (moveFetchTimer) {
+                        window.clearTimeout(moveFetchTimer);
+                    }
+                    moveFetchTimer = window.setTimeout(() => {
+                        moveFetchTimer = null;
+                        fetchVisibleStations(options);
+                    }, 140);
+                }
+
+                async function startMap() {
+                    if (started) {
+                        return;
+                    }
+                    started = true;
+                    try {
+                        await loadStylesheet("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
+                        await loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js");
+                        const franceBounds = L.latLngBounds(L.latLng(41.0, -5.7), L.latLng(51.5, 9.8));
+                        map = L.map(mapEl, {
+                            zoomControl: true,
+                            minZoom: 5,
+                            maxZoom: 12,
+                            maxBounds: franceBounds.pad(0.1),
+                            maxBoundsViscosity: 0.85
+                        });
+                        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        }).addTo(map);
+                        markerLayer = L.layerGroup().addTo(map);
+                        map.fitBounds(franceBounds);
+                        drawMarkers();
+                        map.on("moveend", () => {
+                            if (skipNextMoveFetch) {
+                                skipNextMoveFetch = false;
+                                return;
+                            }
+                            scheduleVisibleStationFetch();
+                        });
+                        fetchVisibleStations({
+                            fitToMarkers: Boolean(fuelwisePayload.filters?.department_code)
+                        });
+                    } catch (error) {
+                        if (loadingEl) {
+                            loadingEl.hidden = false;
+                            loadingEl.textContent = fuelwiseCopy.map.failed;
+                        }
+                    }
+                }
+
+                return {
+                    observe() {
+                        if ("IntersectionObserver" in window) {
+                            const observer = new IntersectionObserver((entries) => {
+                                if (entries.some((entry) => entry.isIntersecting)) {
+                                    observer.disconnect();
+                                    startMap();
+                                }
+                            }, { rootMargin: "200px" });
+                            observer.observe(mapEl);
+                        } else {
+                            startMap();
+                        }
+                    },
+                    setStations(nextStations) {
+                        stations = Array.isArray(nextStations) ? nextStations : [];
+                        if (started && map) {
+                            scheduleVisibleStationFetch({
+                                fitToMarkers: Boolean(fuelwisePayload.filters?.department_code)
+                            });
+                        }
+                    }
+                };
+            })();
+
+            async function loadDepartmentDetail(code, name) {
+                if (!code) {
+                    resetDetail(fuelwisePayload);
+                    return;
+                }
+                selectedDetailDepartmentCode = code;
+                selectedDetailDepartmentName = name || "";
+                setActiveDepartment(code);
+                if (detailTitleEl) {
+                    detailTitleEl.textContent = replaceTokens(fuelwiseCopy.detail.department_title, { name: selectedDetailDepartmentName });
+                }
+                if (detailNoteEl) {
+                    detailNoteEl.textContent = fuelwiseCopy.detail.loading_note;
+                }
+                renderStations([]);
+                if (detailListEl) {
+                    detailListEl.innerHTML = `<p class="empty-state">${escapeHtml(fuelwiseCopy.detail.loading)}</p>`;
+                }
+                resetStationChart();
+
+                const params = new URLSearchParams({
+                    source_type: fuelwisePayload.snapshot_source_type || "official",
+                    snapshot_date: fuelwisePayload.latest_snapshot_date || "",
+                    department_code: code,
+                    fuel_type: fuelwisePayload.filters?.fuel_type || "all",
+                    limit: "250"
+                });
+
+                try {
+                    const response = await fetch(`${fuelwiseUrls.drilldown}?${params.toString()}`, {
+                        headers: { "Accept": "application/json" }
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Request failed with ${response.status}`);
+                    }
+                    const payload = await response.json();
+                    if (detailTitleEl) {
+                        detailTitleEl.textContent = replaceTokens(fuelwiseCopy.detail.department_title, {
+                            name: payload.department_name || selectedDetailDepartmentName
+                        });
+                    }
+                    if (detailNoteEl) {
+                        detailNoteEl.textContent = replaceTokens(fuelwiseCopy.detail.showing, {
+                            count: Array.isArray(payload.stations) ? payload.stations.length : 0,
+                            date: payload.snapshot_date || fuelwisePayload.latest_snapshot_date || ""
+                        });
+                    }
+                    renderStations(payload.stations || []);
+                    resetStationChart();
+                    if (pendingStationSelection && String(pendingStationSelection.departmentCode || "") === String(code || "")) {
+                        const stationExists = Array.isArray(payload.stations)
+                            && payload.stations.some((station) => Number(station.station_id) === Number(pendingStationSelection.stationId));
+                        if (stationExists) {
+                            scrollStationIntoView(pendingStationSelection.stationId);
+                        }
+                        await loadStationTrend(pendingStationSelection.stationId, pendingStationSelection.stationName);
+                        pendingStationSelection = null;
+                    }
+                } catch (error) {
+                    if (detailNoteEl) {
+                        detailNoteEl.textContent = fuelwiseCopy.detail.failed_note;
+                    }
+                    if (detailListEl) {
+                        detailListEl.innerHTML = `<p class="empty-state">${escapeHtml(fuelwiseCopy.detail.failed)}</p>`;
+                    }
+                    pendingStationSelection = null;
+                }
+            }
+
+            async function focusStationFromMap(station) {
+                if (!station?.station_id) {
+                    return;
+                }
+                const stationId = Number(station.station_id);
+                const stationName = station.name || fuelwiseCopy.common_station;
+                const departmentCode = station.department_code || "";
+                const stationAlreadyVisible = detailListEl?.querySelector(`.station-item[data-station-id="${String(stationId)}"]`);
+
+                if (stationAlreadyVisible) {
+                    scrollStationIntoView(stationId);
+                    await loadStationTrend(stationId, stationName);
+                    return;
+                }
+
+                if (departmentCode) {
+                    pendingStationSelection = {
+                        stationId,
+                        stationName,
+                        departmentCode,
+                    };
+                    const departmentName = station.department_name || station.city || departmentCode;
+                    await loadDepartmentDetail(departmentCode, departmentName);
+                    return;
+                }
+
+                scrollStationIntoView(stationId);
+                await loadStationTrend(stationId, stationName);
+            }
+
+            async function loadStationTrend(stationId, stationName) {
+                if (!stationId) {
+                    resetStationChart();
+                    return;
+                }
+                selectedStationId = Number(stationId);
+                selectedStationName = stationName || fuelwiseCopy.common_station;
+                setActiveStation(selectedStationId);
+                if (stationChartTitleEl) {
+                    stationChartTitleEl.textContent = replaceTokens(fuelwiseCopy.station_chart.station_title, { station: selectedStationName });
+                }
+                if (stationChartNoteEl) {
+                    stationChartNoteEl.textContent = fuelwiseCopy.station_chart.loading_note;
+                }
+                if (stationChartEl) {
+                    stationChartEl.innerHTML = "";
+                    stationChartEl.setAttribute("hidden", "hidden");
+                }
+                if (stationChartEmptyEl) {
+                    stationChartEmptyEl.hidden = false;
+                    stationChartEmptyEl.textContent = fuelwiseCopy.station_chart.loading;
+                }
+                renderStationLegend([]);
+                if (stationTrendRequest) {
+                    stationTrendRequest.abort();
+                }
+                const requestController = new AbortController();
+                stationTrendRequest = requestController;
+
+                const params = new URLSearchParams({
+                    station_id: String(stationId),
+                    source_type: fuelwisePayload.snapshot_source_type || "official",
+                    snapshot_date: fuelwisePayload.latest_snapshot_date || "",
+                    fuel_type: fuelwisePayload.filters?.fuel_type || "all",
+                    days: "30"
+                });
+
+                try {
+                    const response = await fetch(`${fuelwiseUrls.stationTrend}?${params.toString()}`, {
+                        headers: { "Accept": "application/json" },
+                        signal: requestController.signal
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Request failed with ${response.status}`);
+                    }
+                    const payload = await response.json();
+                    if (stationChartTitleEl) {
+                        stationChartTitleEl.textContent = replaceTokens(fuelwiseCopy.station_chart.station_title, {
+                            station: payload.station_name || selectedStationName
+                        });
+                    }
+                    if (stationChartNoteEl) {
+                        stationChartNoteEl.textContent = replaceTokens(fuelwiseCopy.station_chart.showing, {
+                            days: payload.days || 30,
+                            total: payload.totals?.period_total || 0
+                        });
+                    }
+                    renderStationChart(payload);
+                } catch (error) {
+                    if (error.name === "AbortError") {
+                        return;
+                    }
+                    if (stationChartTitleEl) {
+                        stationChartTitleEl.textContent = replaceTokens(fuelwiseCopy.station_chart.station_title, { station: selectedStationName });
+                    }
+                    if (stationChartNoteEl) {
+                        stationChartNoteEl.textContent = fuelwiseCopy.station_chart.failed_note;
+                    }
+                    if (stationChartEl) {
+                        stationChartEl.innerHTML = "";
+                        stationChartEl.setAttribute("hidden", "hidden");
+                    }
+                    if (stationChartEmptyEl) {
+                        stationChartEmptyEl.hidden = false;
+                        stationChartEmptyEl.textContent = fuelwiseCopy.station_chart.failed;
+                    }
+                } finally {
+                    if (stationTrendRequest === requestController) {
+                        stationTrendRequest = null;
+                    }
+                }
+            }
+
+            function updateUrlFromPayload(payload) {
+                const params = new URLSearchParams();
+                const nextFuelType = payload.filters?.fuel_type === "SP95" ? "E10" : payload.filters?.fuel_type;
+                if ((nextFuelType || "all") !== "all") {
+                    params.set("fuel_type", nextFuelType);
+                }
+                if (payload.filters?.department_code) {
+                    params.set("department_code", payload.filters.department_code);
+                }
+                const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+                window.history.replaceState({}, "", nextUrl);
+            }
+
+            function renderAll(payload) {
+                fuelwisePayload = payload;
+                renderHero(payload);
+                renderMetrics(payload);
+                renderSelectOptions(fuelEl, payload.filters?.fuel_options, payload.filters?.fuel_type || "all", "fuel");
+                renderSelectOptions(departmentEl, payload.filters?.department_options, payload.filters?.department_code || "", "department");
+                renderDepartments(payload);
+                renderPriority(payload);
+                renderBars(payload);
+                resetDetail(payload);
+                renderShortageChart();
+                renderPriceChart();
+                mapController.setStations(payload.rupture_map_stations || []);
+                updateUrlFromPayload(payload);
+            }
+
+            function rerenderChartsForViewport() {
+                renderShortageChart();
+                renderPriceChart();
+                if (currentStationTrendPayload && selectedStationId) {
+                    renderStationChart(currentStationTrendPayload);
+                }
+            }
+
+            async function refreshDashboard() {
+                if (!fuelEl || !departmentEl) {
+                    return;
+                }
+                const params = new URLSearchParams();
+                if (fuelEl.value) {
+                    params.set("fuel_type", fuelEl.value);
+                }
+                if (departmentEl.value) {
+                    params.set("department_code", departmentEl.value);
+                }
+                if (dashboardRequest) {
+                    dashboardRequest.abort();
+                }
+                const requestController = new AbortController();
+                dashboardRequest = requestController;
+                setPageLoading(true);
+
+                try {
+                    const response = await fetch(`${fuelwiseUrls.dashboard}${params.toString() ? `?${params.toString()}` : ""}`, {
+                        headers: { "Accept": "application/json" },
+                        signal: requestController.signal
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Request failed with ${response.status}`);
+                    }
+                    const payload = await response.json();
+                    renderAll(payload);
+                } catch (error) {
+                    if (error.name !== "AbortError") {
+                        console.error("fuelwise dashboard refresh failed", error);
+                    }
+                } finally {
+                    if (dashboardRequest === requestController) {
+                        setPageLoading(false);
+                    }
+                }
+            }
+
+            formEl?.addEventListener("submit", (event) => {
+                event.preventDefault();
+                refreshDashboard();
+            });
+            fuelEl?.addEventListener("change", refreshDashboard);
+            departmentEl?.addEventListener("change", refreshDashboard);
+
+            departmentsBodyEl?.addEventListener("click", (event) => {
+                const rowEl = event.target.closest(".department-row");
+                if (rowEl) {
+                    loadDepartmentDetail(rowEl.dataset.departmentCode, rowEl.dataset.departmentName);
+                }
+            });
+            departmentsBodyEl?.addEventListener("keydown", (event) => {
+                const rowEl = event.target.closest(".department-row");
+                if (rowEl && (event.key === "Enter" || event.key === " ")) {
+                    event.preventDefault();
+                    loadDepartmentDetail(rowEl.dataset.departmentCode, rowEl.dataset.departmentName);
+                }
+            });
+            chipListEl?.addEventListener("click", (event) => {
+                const chipEl = event.target.closest(".department-chip");
+                if (chipEl) {
+                    loadDepartmentDetail(chipEl.dataset.departmentCode, chipEl.dataset.departmentName);
+                }
+            });
+            detailListEl?.addEventListener("click", (event) => {
+                const stationEl = event.target.closest(".station-item");
+                if (stationEl) {
+                    loadStationTrend(stationEl.dataset.stationId, stationEl.dataset.stationName);
+                }
+            });
+            detailListEl?.addEventListener("keydown", (event) => {
+                const stationEl = event.target.closest(".station-item");
+                if (stationEl && (event.key === "Enter" || event.key === " ")) {
+                    event.preventDefault();
+                    loadStationTrend(stationEl.dataset.stationId, stationEl.dataset.stationName);
+                }
+            });
+
+            window.addEventListener("resize", () => {
+                if (resizeFrame) {
+                    window.cancelAnimationFrame(resizeFrame);
+                }
+                resizeFrame = window.requestAnimationFrame(() => {
+                    rerenderChartsForViewport();
+                    resizeFrame = null;
+                });
+            });
+
+            document.addEventListener("click", (event) => {
+                if (!event.target.closest(".chart-shell")) {
+                    shortageTooltipEl.hidden = true;
+                    priceTooltipEl.hidden = true;
+                    stationChartTooltipEl.hidden = true;
+                }
+            });
+
+            renderAll(fuelwisePayload);
+            mapController.observe();
+        })();
