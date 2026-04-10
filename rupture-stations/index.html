@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FuelWise Supply Dashboard</title>
-    <meta name="description" content="FuelWise dashboard showing fuel shortages, affected departments, trends, and a map of France.">
+    <meta name="description" content="FuelWise dashboard showing fuel shortages, affected Departements, trends, and a map of France.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
@@ -30,15 +30,37 @@
             <form id="fuelwise-global-filter-form" class="chart-controls">
                 <label class="control">
                     <span>Fuel type</span>
-                    <select name="fuel_type" id="fuelwise-global-fuel-filter">
-                        <option value="all">Loading fuel types…</option>
-                    </select>
+                    <div class="filter-combobox" data-filter-kind="fuel">
+                        <input type="hidden" name="fuel_type" id="fuelwise-global-fuel-filter" value="all">
+                        <input
+                            type="text"
+                            id="fuelwise-global-fuel-filter-input"
+                            class="filter-combobox-input"
+                            placeholder="Loading fuel types…"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                            aria-controls="fuelwise-global-fuel-filter-list"
+                            autocomplete="off">
+                        <div class="filter-combobox-list" id="fuelwise-global-fuel-filter-list" role="listbox" hidden></div>
+                    </div>
                 </label>
                 <label class="control">
-                    <span>Department</span>
-                    <select name="department_code" id="fuelwise-global-department-filter">
-                        <option value="">Loading departments…</option>
-                    </select>
+                    <span>Departement</span>
+                    <div class="filter-combobox" data-filter-kind="department">
+                        <input type="hidden" name="department_code" id="fuelwise-global-department-filter" value="">
+                        <input
+                            type="text"
+                            id="fuelwise-global-department-filter-input"
+                            class="filter-combobox-input"
+                            placeholder="Loading Departements…"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                            aria-controls="fuelwise-global-department-filter-list"
+                            autocomplete="off">
+                        <div class="filter-combobox-list" id="fuelwise-global-department-filter-list" role="listbox" hidden></div>
+                    </div>
                 </label>
                 <label class="control control-slider">
                     <div class="control-heading">
@@ -46,9 +68,6 @@
                         <span class="control-meta" id="fuelwise-timeframe-dates">Showing the full available range</span>
                     </div>
                     <div class="timeframe-slider-shell">
-                        <div class="timeframe-slider-header">
-                            <strong id="fuelwise-timeframe-label">All</strong>
-                        </div>
                         <input type="range" name="timeframe" id="fuelwise-global-timeframe-filter" min="0" max="3" step="1" value="3" aria-describedby="fuelwise-timeframe-dates">
                         <div class="timeframe-slider-scale" aria-hidden="true">
                             <span>7d</span>
@@ -74,9 +93,9 @@
                 <span class="metric-foot" id="fuelwise-metric-shortage-foot">Stations affected in the current snapshot</span>
             </article>
             <article class="metric-card">
-                <span class="metric-label">Affected departments</span>
+                <span class="metric-label">Affected Departements</span>
                 <strong class="metric-value" id="fuelwise-metric-affected-departments">0</strong>
-                <span class="metric-foot" id="fuelwise-metric-affected-foot">Departments with at least one affected station</span>
+                <span class="metric-foot" id="fuelwise-metric-affected-foot">Departements with at least one affected station</span>
             </article>
             <article class="metric-card">
                 <span class="metric-label">Fuel shortages</span>
@@ -121,7 +140,7 @@
                     <p class="eyebrow">Prices</p>
                     <h2>Average price over time</h2>
                 </div>
-                <p class="panel-note">Prices often rise when shortages spread. Use the filters to compare France with one department.</p>
+                <p class="panel-note">Prices often rise when shortages spread. Use the filters to compare France with one Departement.</p>
             </div>
                 <div class="chart-controls">
                     <div class="chart-legend" id="fuelwise-price-chart-legend" aria-label="Price fuel lines"></div>
@@ -152,7 +171,7 @@
                         <p class="eyebrow">Map</p>
                         <h2>Stations with shortages in France</h2>
                     </div>
-                    <p class="panel-note">Start with the France heat map, then click a department to switch into station view.</p>
+                    <p class="panel-note">Start with the France heat map, then click a Departement to switch into station view.</p>
                 </div>
                 <div class="france-map">
                     <div id="fuelwise-france-map" class="france-map-canvas" aria-label="Map of France showing stations with shortages"></div>
@@ -170,7 +189,7 @@
                 <div class="panel-header">
                     <div>
                         <p class="eyebrow">Compare</p>
-                        <h2>Departments with the most affected stations</h2>
+                        <h2>Departements with the most affected stations</h2>
                     </div>
                     <p class="panel-note">A quick way to spot where shortages are hitting the most stations.</p>
                 </div>
@@ -187,14 +206,13 @@
                         <p class="eyebrow">Station list</p>
                         <h2 id="fuelwise-detail-title">Recent affected stations</h2>
                     </div>
-                    <p class="panel-note" id="fuelwise-detail-note">Click a department to see the stations behind the totals.</p>
-                </div>
-                <div class="detail-toolbar">
-                    <label class="control station-search-control">
+                    <div class="detail-header-search">
+                        <label class="control station-search-control station-search-control-inline">
                         <span>Find a station</span>
                         <input type="search" id="fuelwise-station-search" placeholder="Search by station, city, or address">
-                    </label>
-                    <button type="button" class="ghost-button" id="fuelwise-clear-station-search">Clear search</button>
+                        </label>
+                        <button type="button" class="ghost-button" id="fuelwise-clear-station-search">Clear</button>
+                    </div>
                 </div>
                 <div class="table-shell station-table-shell">
                     <table class="station-table">

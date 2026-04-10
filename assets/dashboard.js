@@ -52,9 +52,12 @@ async function loadBootData() {
     const pageShellEl = document.querySelector(".page-shell");
             const formEl = document.getElementById("fuelwise-global-filter-form");
             const fuelEl = document.getElementById("fuelwise-global-fuel-filter");
+            const fuelInputEl = document.getElementById("fuelwise-global-fuel-filter-input");
+            const fuelListEl = document.getElementById("fuelwise-global-fuel-filter-list");
             const departmentEl = document.getElementById("fuelwise-global-department-filter");
+            const departmentInputEl = document.getElementById("fuelwise-global-department-filter-input");
+            const departmentListEl = document.getElementById("fuelwise-global-department-filter-list");
             const timeframeEl = document.getElementById("fuelwise-global-timeframe-filter");
-            const timeframeLabelEl = document.getElementById("fuelwise-timeframe-label");
             const timeframeDatesEl = document.getElementById("fuelwise-timeframe-dates");
             const activeFiltersEl = document.getElementById("fuelwise-active-filters");
             const stationSearchEl = document.getElementById("fuelwise-station-search");
@@ -77,7 +80,6 @@ async function loadBootData() {
             const barChartEl = document.getElementById("fuelwise-bar-chart");
             const detailListEl = document.getElementById("fuelwise-station-detail-list");
             const detailTitleEl = document.getElementById("fuelwise-detail-title");
-            const detailNoteEl = document.getElementById("fuelwise-detail-note");
             const stationChartTitleEl = document.getElementById("fuelwise-station-chart-title");
             const stationChartNoteEl = document.getElementById("fuelwise-station-chart-note");
             const stationChartLegendEl = document.getElementById("fuelwise-station-chart-legend");
@@ -142,12 +144,29 @@ async function loadBootData() {
             let currentStationTrendPayload = null;
             let resizeFrame = null;
             let franceReferenceTotalStations = null;
+            let openComboboxKind = "";
             const timeframeOptions = [
                 { step: "0", value: "7", label: "Last 7 days" },
                 { step: "1", value: "3", label: "Last 3 days" },
                 { step: "2", value: "90", label: "Last 90 days" },
                 { step: "3", value: "all", label: "All" }
             ];
+            const filterComboboxes = {
+                fuel: {
+                    kind: "fuel",
+                    hiddenEl: fuelEl,
+                    inputEl: fuelInputEl,
+                    listEl: fuelListEl,
+                    options: []
+                },
+                department: {
+                    kind: "department",
+                    hiddenEl: departmentEl,
+                    inputEl: departmentInputEl,
+                    listEl: departmentListEl,
+                    options: []
+                }
+            };
             const stationFuelPriority = ["SP98", "Gazole", "SP95", "E10", "E85", "GPLc", "Unknown"];
             const initialQuery = new URLSearchParams(window.location.search);
             if (timeframeEl && initialQuery.has("timeframe")) {
@@ -240,8 +259,14 @@ async function loadBootData() {
                 if (fuelEl) {
                     fuelEl.disabled = isLoading;
                 }
+                if (fuelInputEl) {
+                    fuelInputEl.disabled = isLoading;
+                }
                 if (departmentEl) {
                     departmentEl.disabled = isLoading;
+                }
+                if (departmentInputEl) {
+                    departmentInputEl.disabled = isLoading;
                 }
             }
 
@@ -316,9 +341,6 @@ async function loadBootData() {
             }
 
             function updateTimeframeSummary() {
-                if (timeframeLabelEl) {
-                    timeframeLabelEl.textContent = getSelectedTimeframeLabel();
-                }
                 if (!timeframeDatesEl) {
                     return;
                 }
@@ -375,7 +397,7 @@ async function loadBootData() {
                     badges.push({
                         kind: "department",
                         value: selectedDepartment,
-                        label: `Department: ${payload?.scope?.department_name || selectedDepartment}`
+                        label: `Departement: ${payload?.scope?.department_name || selectedDepartment}`
                     });
                 }
                 if (getSelectedTimeframeDays()) {
@@ -414,7 +436,7 @@ async function loadBootData() {
                     heroScopeEl.textContent = scopeText(payload);
                 }
                 if (heroSummaryEl) {
-                    heroSummaryEl.textContent = "Monitor fuel shortages across France, compare departments quickly, and drill into the stations that need attention.";
+                    heroSummaryEl.textContent = "Monitor fuel shortages across France, compare Departements quickly, and drill into the stations that need attention.";
                 }
                 if (sourcePillEl) {
                     sourcePillEl.className = `pill pill-${payload.data_mode || "live"}`;
@@ -454,7 +476,7 @@ async function loadBootData() {
                     if (isDepartmentScope && franceReferenceTotalStations) {
                         totalStationsFootEl.textContent = `${formatPercent((totalStations / franceReferenceTotalStations) * 100)} of French stations are in ${scopeName}.`;
                     } else {
-                        totalStationsFootEl.textContent = "Stations covered by the current dashboard scope.";
+                        totalStationsFootEl.textContent = "Total stations in Metropolitan France.";
                     }
                 }
                 if (shortageStationsFootEl) {
@@ -464,8 +486,8 @@ async function loadBootData() {
                 }
                 if (affectedDepartmentsFootEl) {
                     affectedDepartmentsFootEl.textContent = isDepartmentScope
-                        ? `Current focus is ${scopeName}. Clear the department filter to compare the national spread.`
-                        : "Departments with at least one station currently affected.";
+                        ? `Current focus is ${scopeName}. Clear the Departement filter to compare the national spread.`
+                        : "Departements with at least one station currently affected.";
                 }
                 if (shortageRowsFootEl) {
                     shortageRowsFootEl.textContent = isDepartmentScope
@@ -474,22 +496,135 @@ async function loadBootData() {
                 }
             }
 
-            function renderSelectOptions(selectEl, options, selectedValue, kind) {
-                if (!selectEl) {
+            function normalizeComboboxValue(kind, value) {
+                const fallbackValue = kind === "fuel" ? "all" : "";
+                if (kind === "fuel" && value === "SP95") {
+                    return "E10";
+                }
+                return value == null ? fallbackValue : String(value);
+            }
+
+            function formatComboboxOption(option, kind) {
+                const value = kind === "department" ? option.code : option.value;
+                if (kind === "fuel" && value === "SP95") {
+                    return null;
+                }
+                const label = kind === "department"
+                    ? (option.code === "" ? fuelwiseCopy.filters.all_france : option.name)
+                    : (option.value === "all" ? fuelwiseCopy.filters.all_main_fuels : displayFuelName(option.label));
+                return {
+                    value: normalizeComboboxValue(kind, value),
+                    label: String(label || "")
+                };
+            }
+
+            function getComboboxState(kind) {
+                return filterComboboxes[kind] || null;
+            }
+
+            function getSelectedComboboxOption(state) {
+                if (!state) {
+                    return null;
+                }
+                const selectedValue = normalizeComboboxValue(state.kind, state.hiddenEl?.value);
+                return state.options.find((option) => option.value === selectedValue) || state.options[0] || null;
+            }
+
+            function syncComboboxInput(state) {
+                if (!state?.inputEl) {
                     return;
                 }
-                selectEl.innerHTML = (options || []).map((option) => {
-                    const value = kind === "department" ? option.code : option.value;
-                    if (kind === "fuel" && value === "SP95") {
-                        return "";
-                    }
-                    const label = kind === "department"
-                        ? (option.code === "" ? fuelwiseCopy.filters.all_france : option.name)
-                        : (option.value === "all" ? fuelwiseCopy.filters.all_main_fuels : displayFuelName(option.label));
-                    const normalizedSelectedValue = kind === "fuel" && selectedValue === "SP95" ? "E10" : selectedValue;
-                    const selected = value === normalizedSelectedValue ? " selected" : "";
-                    return `<option value="${escapeHtml(value)}"${selected}>${escapeHtml(label)}</option>`;
-                }).join("");
+                const selectedOption = getSelectedComboboxOption(state);
+                state.inputEl.value = selectedOption?.label || "";
+            }
+
+            function getComboboxMatches(state, query) {
+                const needle = String(query || "").trim().toLowerCase();
+                if (!needle) {
+                    return state.options;
+                }
+                return state.options.filter((option) => option.label.toLowerCase().includes(needle));
+            }
+
+            function renderComboboxMenu(state, query) {
+                if (!state?.listEl || !state?.inputEl) {
+                    return;
+                }
+                const selectedOption = getSelectedComboboxOption(state);
+                const matches = getComboboxMatches(state, query);
+                if (!matches.length) {
+                    state.listEl.innerHTML = `<div class="filter-combobox-empty">No matches found.</div>`;
+                    state.listEl.hidden = false;
+                    state.inputEl.setAttribute("aria-expanded", "true");
+                    return;
+                }
+                state.listEl.innerHTML = matches.map((option) => `
+                    <button
+                        type="button"
+                        class="filter-combobox-option${selectedOption && selectedOption.value === option.value ? " is-selected" : ""}"
+                        role="option"
+                        data-value="${escapeHtml(option.value)}"
+                        aria-selected="${selectedOption && selectedOption.value === option.value ? "true" : "false"}">
+                        ${escapeHtml(option.label)}
+                    </button>
+                `).join("");
+                state.listEl.hidden = false;
+                state.inputEl.setAttribute("aria-expanded", "true");
+            }
+
+            function closeCombobox(kind, restoreSelectedLabel = true) {
+                const state = getComboboxState(kind);
+                if (!state?.listEl || !state?.inputEl) {
+                    return;
+                }
+                state.listEl.hidden = true;
+                state.inputEl.setAttribute("aria-expanded", "false");
+                if (restoreSelectedLabel) {
+                    syncComboboxInput(state);
+                }
+                if (openComboboxKind === kind) {
+                    openComboboxKind = "";
+                }
+            }
+
+            function openCombobox(kind, query = "") {
+                const state = getComboboxState(kind);
+                if (!state?.inputEl || !state?.listEl) {
+                    return;
+                }
+                if (openComboboxKind && openComboboxKind !== kind) {
+                    closeCombobox(openComboboxKind);
+                }
+                openComboboxKind = kind;
+                renderComboboxMenu(state, query);
+            }
+
+            function setComboboxValue(kind, value, { refresh = false, close = true } = {}) {
+                const state = getComboboxState(kind);
+                if (!state?.hiddenEl) {
+                    return;
+                }
+                state.hiddenEl.value = normalizeComboboxValue(kind, value);
+                syncComboboxInput(state);
+                if (close) {
+                    closeCombobox(kind, false);
+                }
+                if (refresh) {
+                    refreshDashboard();
+                }
+            }
+
+            function renderSelectOptions(selectEl, options, selectedValue, kind) {
+                const state = kind ? getComboboxState(kind) : null;
+                if (!selectEl || !state) {
+                    return;
+                }
+                state.options = (options || [])
+                    .map((option) => formatComboboxOption(option, kind))
+                    .filter(Boolean);
+                selectEl.value = normalizeComboboxValue(kind, selectedValue);
+                syncComboboxInput(state);
+                closeCombobox(kind, false);
             }
 
             function renderDepartments(payload) {
@@ -638,9 +773,6 @@ async function loadBootData() {
                 if (detailTitleEl) {
                     detailTitleEl.textContent = replaceTokens(fuelwiseCopy.detail.department_title, { name: selectedDetailDepartmentName });
                 }
-                if (detailNoteEl) {
-                    detailNoteEl.textContent = "Use the station search below to jump to one site, or clear the department filter when you want the national picture again.";
-                }
                 renderStations(payload.rupture_stations || []);
                 setActiveDepartment(departmentCode);
             }
@@ -656,6 +788,7 @@ async function loadBootData() {
                 if (departmentEl) {
                     departmentEl.value = nextCode;
                 }
+                syncComboboxInput(getComboboxState("department"));
                 refreshDashboard();
             }
 
@@ -725,9 +858,6 @@ async function loadBootData() {
                 }
                 if (detailTitleEl) {
                     detailTitleEl.textContent = fuelwiseCopy.detail.title;
-                }
-                if (detailNoteEl) {
-                    detailNoteEl.textContent = fuelwiseCopy.detail.note;
                 }
                 renderStations(detailStations, { store: false });
                 setActiveDepartment("");
@@ -1931,9 +2061,6 @@ async function loadBootData() {
                 if (detailTitleEl) {
                     detailTitleEl.textContent = replaceTokens(fuelwiseCopy.detail.department_title, { name: selectedDetailDepartmentName });
                 }
-                if (detailNoteEl) {
-                    detailNoteEl.textContent = fuelwiseCopy.detail.loading_note;
-                }
                 renderStations([]);
                 if (detailListEl) {
                     detailListEl.innerHTML = `<tr><td colspan="3" class="empty-state-cell">${escapeHtml(fuelwiseCopy.detail.loading)}</td></tr>`;
@@ -1961,12 +2088,6 @@ async function loadBootData() {
                             name: payload.department_name || selectedDetailDepartmentName
                         });
                     }
-                    if (detailNoteEl) {
-                        detailNoteEl.textContent = replaceTokens(fuelwiseCopy.detail.showing, {
-                            count: formatInteger(Array.isArray(payload.stations) ? payload.stations.length : 0),
-                            date: payload.snapshot_date || fuelwisePayload.latest_snapshot_date || ""
-                        });
-                    }
                     renderStations(payload.stations || []);
                     resetStationChart();
                     if (pendingStationSelection && String(pendingStationSelection.departmentCode || "") === String(code || "")) {
@@ -1979,9 +2100,6 @@ async function loadBootData() {
                         pendingStationSelection = null;
                     }
                 } catch (error) {
-                    if (detailNoteEl) {
-                        detailNoteEl.textContent = fuelwiseCopy.detail.failed_note;
-                    }
                     if (detailListEl) {
                         detailListEl.innerHTML = `<tr><td colspan="3" class="empty-state-cell">${escapeHtml(fuelwiseCopy.detail.failed)}</td></tr>`;
                     }
@@ -2199,8 +2317,55 @@ async function loadBootData() {
                 event.preventDefault();
                 refreshDashboard();
             });
-            fuelEl?.addEventListener("change", refreshDashboard);
-            departmentEl?.addEventListener("change", refreshDashboard);
+            Object.values(filterComboboxes).forEach((state) => {
+                state.inputEl?.addEventListener("focus", () => {
+                    openCombobox(state.kind, "");
+                });
+                state.inputEl?.addEventListener("click", () => {
+                    openCombobox(state.kind, "");
+                });
+                state.inputEl?.addEventListener("input", (event) => {
+                    openCombobox(state.kind, String(event.target.value || ""));
+                });
+                state.inputEl?.addEventListener("keydown", (event) => {
+                    if (event.key === "ArrowDown") {
+                        event.preventDefault();
+                        openCombobox(state.kind, state.inputEl.value);
+                        state.listEl?.querySelector(".filter-combobox-option")?.focus();
+                        return;
+                    }
+                    if (event.key === "Enter") {
+                        const firstMatch = getComboboxMatches(state, state.inputEl.value)[0];
+                        if (firstMatch) {
+                            event.preventDefault();
+                            setComboboxValue(state.kind, firstMatch.value, { refresh: true });
+                        }
+                        return;
+                    }
+                    if (event.key === "Escape") {
+                        closeCombobox(state.kind);
+                    }
+                });
+                state.listEl?.addEventListener("click", (event) => {
+                    const optionEl = event.target.closest(".filter-combobox-option");
+                    if (!optionEl) {
+                        return;
+                    }
+                    setComboboxValue(state.kind, optionEl.dataset.value, { refresh: true });
+                });
+            });
+            document.addEventListener("click", (event) => {
+                const target = event.target;
+                if (!(target instanceof Node)) {
+                    return;
+                }
+                Object.entries(filterComboboxes).forEach(([kind, state]) => {
+                    const wrapper = state.inputEl?.closest(".filter-combobox");
+                    if (wrapper && !wrapper.contains(target)) {
+                        closeCombobox(kind);
+                    }
+                });
+            });
             async function handleTimeframeChange() {
                 updateTimeframeSummary();
                 renderActiveFilters(fuelwisePayload);
@@ -2233,10 +2398,10 @@ async function loadBootData() {
                     return;
                 }
                 if (badgeEl.dataset.filterKind === "fuel" && fuelEl) {
-                    fuelEl.value = "all";
+                    setComboboxValue("fuel", "all");
                 }
                 if (badgeEl.dataset.filterKind === "department" && departmentEl) {
-                    departmentEl.value = "";
+                    setComboboxValue("department", "");
                     pendingStationSelection = null;
                     resetStationChart();
                 }
