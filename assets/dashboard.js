@@ -91,6 +91,7 @@ async function loadBootData() {
             const priceValueEl = document.getElementById("fuelwise-price-value");
             const priceChangeEl = document.getElementById("fuelwise-price-change");
             const pricePeriodChangeEl = document.getElementById("fuelwise-price-period-change");
+            const mapLegendEl = document.getElementById("fuelwise-map-legend");
 
             const shortageAxisLabels = fuelwiseCopy.lang === "fr"
                 ? { left: "Stations en penurie", right: "Part des stations" }
@@ -230,8 +231,16 @@ async function loadBootData() {
                 return `${Math.round(Number(value || 0))}`;
             }
 
+            function formatPercent(value) {
+                return `${Number(value || 0).toFixed(1)}%`;
+            }
+
             function displayFuelName(value) {
                 return fuelDisplayNames[value] || value || "";
+            }
+
+            function normalizeDepartmentCode(value) {
+                return String(value || "").trim().toUpperCase();
             }
 
             function scopeText(payload) {
@@ -1172,16 +1181,31 @@ async function loadBootData() {
                 const mapEl = document.getElementById("fuelwise-france-map");
                 const loadingEl = document.getElementById("fuelwise-map-loading");
                 if (!mapEl) {
-                    return { observe() {}, setStations() {} };
+                    return { observe() {}, sync() {} };
                 }
 
                 let started = false;
                 let map = null;
                 let markerLayer = null;
+                let departmentLayer = null;
+                let departmentGeoJson = null;
                 let stations = Array.isArray(fuelwisePayload.rupture_map_stations) ? fuelwisePayload.rupture_map_stations : [];
                 let markerRequest = null;
                 let moveFetchTimer = null;
                 let skipNextMoveFetch = false;
+                let lastMode = null;
+                let lastSelectionCode = null;
+                const mainlandBoundsArray = [[41.0, -5.7], [51.5, 9.8]];
+                const markerLegendItems = [
+                    { className: "legend-critical", label: "3+ fuel types affected" },
+                    { className: "legend-warning", label: "2 fuel types affected" },
+                    { className: "legend-stable", label: "1 fuel type affected" }
+                ];
+                const departmentLegendItems = [
+                    { className: "legend-critical", label: "25%+ of stations affected" },
+                    { className: "legend-warning", label: "12% to 25% affected" },
+                    { className: "legend-stable", label: "Under 12% affected" }
+                ];
 
                 function loadStylesheet(href) {
                     return new Promise((resolve, reject) => {
@@ -1215,12 +1239,147 @@ async function loadBootData() {
                     });
                 }
 
+                async function loadDepartmentBoundaries() {
+                    if (departmentGeoJson) {
+                        return departmentGeoJson;
+                    }
+                    const response = await fetch("/assets/departements-1000m.geojson", {
+                        headers: { "Accept": "application/json" }
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Failed to load department boundaries (${response.status})`);
+                    }
+                    const raw = await response.json();
+                    departmentGeoJson = {
+                        ...raw,
+                        features: Array.isArray(raw.features)
+                            ? raw.features.filter((feature) => {
+                                const code = normalizeDepartmentCode(feature?.properties?.code);
+                                return code && !/^9[78]/.test(code);
+                            })
+                            : []
+                    };
+                    return departmentGeoJson;
+                }
+
+                function getMainlandBounds() {
+                    return window.L
+                        ? L.latLngBounds(L.latLng(mainlandBoundsArray[0][0], mainlandBoundsArray[0][1]), L.latLng(mainlandBoundsArray[1][0], mainlandBoundsArray[1][1]))
+                        : null;
+                }
+
+                function getDepartmentMetrics() {
+                    const metrics = new Map();
+                    (fuelwisePayload.departments || []).forEach((department) => {
+                        metrics.set(normalizeDepartmentCode(department.code), department);
+                    });
+                    return metrics;
+                }
+
+                function getDepartmentMode() {
+                    return fuelwisePayload.filters?.department_code ? "stations" : "departments";
+                }
+
+                function getDepartmentFillColor(issueRate) {
+                    const value = Number(issueRate || 0);
+                    if (value >= 25) {
+                        return "#ff6b57";
+                    }
+                    if (value >= 12) {
+                        return "#ffbf47";
+                    }
+                    if (value > 0) {
+                        return "#46d29e";
+                    }
+                    return "#173247";
+                }
+
+                function updateLegend(mode) {
+                    if (!mapLegendEl) {
+                        return;
+                    }
+                    const items = mode === "stations" ? markerLegendItems : departmentLegendItems;
+                    mapLegendEl.innerHTML = items.map((item) => `
+                        <span><i class="legend-dot ${escapeHtml(item.className)}"></i> ${escapeHtml(item.label)}</span>
+                    `).join("");
+                }
+
+                function buildDepartmentPopup(properties, metrics, code) {
+                    const affected = Number(metrics?.issue_station_count || 0);
+                    const total = Number(metrics?.total_station_count || 0);
+                    const issueRate = Number(metrics?.issue_rate || 0);
+                    return `
+                        <div class="fuelwise-popup">
+                            <strong>${escapeHtml(properties.nom || metrics?.name || code)}</strong>
+                            <div>${escapeHtml(code)}</div>
+                            <div class="popup-metric"><strong>${escapeHtml(formatPercent(issueRate))}</strong> of stations affected</div>
+                            <div>${escapeHtml(`${affected} / ${total} stations`)}</div>
+                        </div>
+                    `;
+                }
+
+                function drawDepartments() {
+                    if (!map || !window.L || !departmentGeoJson) {
+                        return;
+                    }
+                    if (departmentLayer) {
+                        map.removeLayer(departmentLayer);
+                        departmentLayer = null;
+                    }
+                    const departmentMetrics = getDepartmentMetrics();
+                    const selectedCode = normalizeDepartmentCode(fuelwisePayload.filters?.department_code);
+                    departmentLayer = L.geoJSON(departmentGeoJson, {
+                        style(feature) {
+                            const code = normalizeDepartmentCode(feature?.properties?.code);
+                            const metrics = departmentMetrics.get(code);
+                            const issueRate = Number(metrics?.issue_rate || 0);
+                            const isSelected = Boolean(selectedCode) && code === selectedCode;
+                            return {
+                                color: isSelected ? "#f6f8fb" : "rgba(255,255,255,0.18)",
+                                weight: isSelected ? 2.4 : 1,
+                                fillColor: getDepartmentFillColor(issueRate),
+                                fillOpacity: isSelected ? 0.72 : (issueRate > 0 ? 0.62 : 0.24)
+                            };
+                        },
+                        onEachFeature(feature, layer) {
+                            const code = normalizeDepartmentCode(feature?.properties?.code);
+                            const metrics = departmentMetrics.get(code);
+                            layer.bindTooltip(buildDepartmentPopup(feature.properties || {}, metrics, code), {
+                                sticky: true,
+                                direction: "top",
+                                className: "department-tooltip"
+                            });
+                            layer.on({
+                                mouseover() {
+                                    layer.setStyle({
+                                        weight: 2.2,
+                                        color: "#f6f8fb"
+                                    });
+                                },
+                                mouseout() {
+                                    departmentLayer.resetStyle(layer);
+                                },
+                                click() {
+                                    const nextCode = code;
+                                    const nextName = feature?.properties?.nom || metrics?.name || nextCode;
+                                    if (departmentEl) {
+                                        departmentEl.value = nextCode;
+                                    }
+                                    selectedDetailDepartmentCode = nextCode;
+                                    selectedDetailDepartmentName = nextName;
+                                    refreshDashboard();
+                                }
+                            });
+                        }
+                    }).addTo(map);
+                }
+
                 function drawMarkers({ fitToMarkers = false } = {}) {
                     if (!map || !markerLayer || !window.L) {
                         return;
                     }
                     markerLayer.clearLayers();
-                    const franceBounds = L.latLngBounds(L.latLng(41.0, -5.7), L.latLng(51.5, 9.8));
+                    const franceBounds = getMainlandBounds();
                     const stationBounds = [];
                     const colorByStatus = {
                         critical: "#ff6b57",
@@ -1260,7 +1419,7 @@ async function loadBootData() {
                         skipNextMoveFetch = true;
                         if (stationBounds.length) {
                             map.fitBounds(L.latLngBounds(stationBounds).pad(0.18));
-                        } else {
+                        } else if (franceBounds) {
                             map.fitBounds(franceBounds);
                         }
                     }
@@ -1338,6 +1497,65 @@ async function loadBootData() {
                     }, 140);
                 }
 
+                function clearMarkers() {
+                    if (markerLayer) {
+                        markerLayer.clearLayers();
+                    }
+                }
+
+                function syncMapScene() {
+                    if (!started || !map) {
+                        return;
+                    }
+                    const mode = getDepartmentMode();
+                    const selectedCode = normalizeDepartmentCode(fuelwisePayload.filters?.department_code);
+
+                    updateLegend(mode);
+                    drawDepartments();
+
+                    if (mode === "stations") {
+                        if (departmentLayer && selectedCode && selectedCode !== lastSelectionCode) {
+                            departmentLayer.eachLayer((layer) => {
+                                const code = normalizeDepartmentCode(layer?.feature?.properties?.code);
+                                if (code === selectedCode) {
+                                    const bounds = layer.getBounds?.();
+                                    if (bounds?.isValid?.()) {
+                                        skipNextMoveFetch = true;
+                                        map.fitBounds(bounds.pad(0.08));
+                                    }
+                                }
+                            });
+                        }
+                        scheduleVisibleStationFetch({ fitToMarkers: false });
+                        if (loadingEl) {
+                            loadingEl.hidden = false;
+                            loadingEl.textContent = fuelwiseCopy.map.loading;
+                        }
+                    } else {
+                        if (markerRequest) {
+                            markerRequest.abort();
+                            markerRequest = null;
+                        }
+                        if (moveFetchTimer) {
+                            window.clearTimeout(moveFetchTimer);
+                            moveFetchTimer = null;
+                        }
+                        clearMarkers();
+                        if (selectedCode !== lastSelectionCode || lastMode !== mode) {
+                            const bounds = getMainlandBounds();
+                            if (bounds) {
+                                skipNextMoveFetch = true;
+                                map.fitBounds(bounds);
+                            }
+                        }
+                        if (loadingEl) {
+                            loadingEl.hidden = true;
+                        }
+                    }
+                    lastMode = mode;
+                    lastSelectionCode = selectedCode;
+                }
+
                 async function startMap() {
                     if (started) {
                         return;
@@ -1346,7 +1564,8 @@ async function loadBootData() {
                     try {
                         await loadStylesheet("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
                         await loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js");
-                        const franceBounds = L.latLngBounds(L.latLng(41.0, -5.7), L.latLng(51.5, 9.8));
+                        await loadDepartmentBoundaries();
+                        const franceBounds = getMainlandBounds();
                         map = L.map(mapEl, {
                             zoomControl: true,
                             minZoom: 5,
@@ -1359,18 +1578,19 @@ async function loadBootData() {
                         }).addTo(map);
                         markerLayer = L.layerGroup().addTo(map);
                         map.fitBounds(franceBounds);
-                        drawMarkers();
                         map.on("moveend", () => {
+                            if (getDepartmentMode() !== "stations") {
+                                return;
+                            }
                             if (skipNextMoveFetch) {
                                 skipNextMoveFetch = false;
                                 return;
                             }
                             scheduleVisibleStationFetch();
                         });
-                        fetchVisibleStations({
-                            fitToMarkers: Boolean(fuelwisePayload.filters?.department_code)
-                        });
+                        syncMapScene();
                     } catch (error) {
+                        console.error("fuelwise map failed", error);
                         if (loadingEl) {
                             loadingEl.hidden = false;
                             loadingEl.textContent = fuelwiseCopy.map.failed;
@@ -1392,12 +1612,10 @@ async function loadBootData() {
                             startMap();
                         }
                     },
-                    setStations(nextStations) {
+                    sync(nextStations) {
                         stations = Array.isArray(nextStations) ? nextStations : [];
                         if (started && map) {
-                            scheduleVisibleStationFetch({
-                                fitToMarkers: Boolean(fuelwisePayload.filters?.department_code)
-                            });
+                            syncMapScene();
                         }
                     }
                 };
@@ -1610,7 +1828,7 @@ async function loadBootData() {
                 resetDetail(payload);
                 renderShortageChart();
                 renderPriceChart();
-                mapController.setStations(payload.rupture_map_stations || []);
+                mapController.sync(payload.rupture_map_stations || []);
                 updateUrlFromPayload(payload);
             }
 

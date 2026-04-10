@@ -525,6 +525,34 @@ h2 {
     margin-bottom: 4px;
 }
 
+.fuelwise-popup .popup-metric {
+    margin-top: 6px;
+    color: var(--muted);
+}
+
+.fuelwise-popup .popup-metric strong {
+    display: inline;
+    margin: 0;
+    color: var(--text);
+}
+
+.leaflet-container {
+    font: inherit;
+    background: transparent;
+}
+
+.leaflet-tooltip.department-tooltip {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    background: rgba(10, 23, 38, 0.94);
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+
+.leaflet-tooltip.department-tooltip::before {
+    border-top-color: rgba(10, 23, 38, 0.94);
+}
+
 .table-shell {
     overflow-x: auto;
 }
