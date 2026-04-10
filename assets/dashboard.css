@@ -47,8 +47,7 @@ body {
 .metrics-grid,
 .dashboard-grid,
 .callout,
-.chart-panel,
-.journey-panel {
+.chart-panel {
     margin-bottom: 18px;
 }
 
@@ -214,87 +213,13 @@ h2 {
     margin-bottom: 16px;
 }
 
-.journey-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 18px;
-}
-
-.journey-step {
-    padding: 16px 18px;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.03);
-    display: grid;
-    gap: 8px;
-    transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
-}
-
-.journey-step strong {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 1rem;
-}
-
-.journey-step p {
-    margin: 0;
-    color: var(--muted);
-    line-height: 1.5;
-    font-size: 0.92rem;
-}
-
-.journey-step.is-current {
-    background: linear-gradient(180deg, rgba(244, 127, 61, 0.18), rgba(255, 178, 74, 0.08));
-    border-color: rgba(255, 178, 74, 0.4);
-    transform: translateY(-2px);
-}
-
-.journey-step.is-complete {
-    border-color: rgba(244, 127, 61, 0.24);
-    background: rgba(244, 127, 61, 0.08);
-}
-
-.journey-index {
-    width: 34px;
-    height: 34px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    font-family: "Space Grotesk", sans-serif;
-    color: var(--text);
-}
-
-.scope-rail {
+.filter-panel {
     position: sticky;
     top: 12px;
-    z-index: 8;
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    align-items: center;
-    padding: 16px 18px;
-    border-radius: 18px;
-    background: linear-gradient(180deg, rgba(8, 17, 29, 0.88), rgba(10, 23, 38, 0.78));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 10;
 }
 
-.scope-rail-label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-}
-
-.scope-rail strong {
-    font-family: "Space Grotesk", sans-serif;
-    font-size: 1.15rem;
-}
-
-.scope-rail-actions,
+.filter-badges,
 .detail-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -302,6 +227,7 @@ h2 {
     align-items: end;
 }
 
+.filter-badge,
 .ghost-button {
     appearance: none;
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -315,6 +241,24 @@ h2 {
     transition: background 160ms ease, border-color 160ms ease, opacity 160ms ease;
 }
 
+.filter-badge {
+    gap: 10px;
+}
+
+.filter-badge-remove {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.92rem;
+    line-height: 1;
+}
+
+.filter-badge:hover,
+.filter-badge:focus-visible,
 .ghost-button:hover,
 .ghost-button:focus-visible {
     background: rgba(255, 178, 74, 0.12);
@@ -891,18 +835,12 @@ th {
     .hero,
     .metrics-grid,
     .dashboard-grid,
-    .bottom-grid,
-    .journey-grid {
+    .bottom-grid {
         grid-template-columns: 1fr;
     }
 
     .hero-meta {
         align-items: flex-start;
-    }
-
-    .scope-rail {
-        align-items: flex-start;
-        flex-direction: column;
     }
 
     .chart-stat {
@@ -963,7 +901,7 @@ th {
     }
 
     .detail-toolbar,
-    .scope-rail-actions {
+    .filter-badges {
         width: 100%;
     }
 

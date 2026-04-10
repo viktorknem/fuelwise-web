@@ -53,9 +53,7 @@ async function loadBootData() {
             const formEl = document.getElementById("fuelwise-global-filter-form");
             const fuelEl = document.getElementById("fuelwise-global-fuel-filter");
             const departmentEl = document.getElementById("fuelwise-global-department-filter");
-            const currentPathEl = document.getElementById("fuelwise-current-path");
-            const resetFranceEl = document.getElementById("fuelwise-reset-france");
-            const clearStationEl = document.getElementById("fuelwise-clear-station");
+            const activeFiltersEl = document.getElementById("fuelwise-active-filters");
             const stationSearchEl = document.getElementById("fuelwise-station-search");
             const clearStationSearchEl = document.getElementById("fuelwise-clear-station-search");
             const heroScopeEl = document.getElementById("fuelwise-hero-scope");
@@ -135,7 +133,6 @@ async function loadBootData() {
             let pendingStationSelection = null;
             let currentStationTrendPayload = null;
             let resizeFrame = null;
-            const journeyStepEls = Array.from(document.querySelectorAll(".journey-step"));
 
             function isPhoneViewport() {
                 return window.matchMedia("(max-width: 640px)").matches;
@@ -247,45 +244,46 @@ async function loadBootData() {
                 return fuelDisplayNames[value] || value || "";
             }
 
+            function shortageify(value) {
+                return String(value || "")
+                    .replace(/\bRuptures\b/g, "Shortages")
+                    .replace(/\bRupture\b/g, "Shortage")
+                    .replace(/\bruptures\b/g, "shortages")
+                    .replace(/\brupture\b/g, "shortage");
+            }
+
             function normalizeDepartmentCode(value) {
                 return String(value || "").trim().toUpperCase();
             }
 
-            function currentJourneyStage() {
-                if (selectedStationId) {
-                    return 3;
+            function renderActiveFilters(payload) {
+                if (!activeFiltersEl) {
+                    return;
                 }
-                if (fuelwisePayload?.filters?.department_code) {
-                    return 2;
+                const badges = [];
+                const selectedFuel = payload?.filters?.fuel_type || "all";
+                const selectedDepartment = payload?.filters?.department_code || "";
+                if (selectedFuel && selectedFuel !== "all") {
+                    badges.push({
+                        kind: "fuel",
+                        value: selectedFuel,
+                        label: `Fuel: ${displayFuelName(selectedFuel)}`
+                    });
                 }
-                return 1;
-            }
-
-            function renderJourney() {
-                const scopeDepartmentName = fuelwisePayload?.scope?.department_name || selectedDetailDepartmentName || "";
-                const parts = [fuelwiseCopy.filters?.all_france || "France"];
-                if (fuelwisePayload?.filters?.department_code) {
-                    parts.push(scopeDepartmentName || fuelwisePayload.filters.department_code);
+                if (selectedDepartment) {
+                    badges.push({
+                        kind: "department",
+                        value: selectedDepartment,
+                        label: `Department: ${payload?.scope?.department_name || selectedDepartment}`
+                    });
                 }
-                if (selectedStationId && selectedStationName) {
-                    parts.push(selectedStationName);
-                }
-                if (currentPathEl) {
-                    currentPathEl.textContent = parts.join(" / ");
-                }
-                const stage = currentJourneyStage();
-                journeyStepEls.forEach((el) => {
-                    const step = Number(el.dataset.journeyStage || 0);
-                    el.classList.toggle("is-current", step === stage);
-                    el.classList.toggle("is-complete", step < stage);
-                });
-                if (resetFranceEl) {
-                    const canResetFrance = Boolean(fuelwisePayload?.filters?.department_code);
-                    resetFranceEl.disabled = !canResetFrance;
-                }
-                if (clearStationEl) {
-                    clearStationEl.disabled = !selectedStationId;
-                }
+                activeFiltersEl.hidden = !badges.length;
+                activeFiltersEl.innerHTML = badges.map((badge) => `
+                    <button type="button" class="filter-badge" data-filter-kind="${escapeHtml(badge.kind)}" data-filter-value="${escapeHtml(badge.value)}">
+                        <span>${escapeHtml(badge.label)}</span>
+                        <span class="filter-badge-remove" aria-hidden="true">&times;</span>
+                    </button>
+                `).join("");
             }
 
             function scopeText(payload) {
@@ -494,7 +492,7 @@ async function loadBootData() {
                     detailTitleEl.textContent = replaceTokens(fuelwiseCopy.detail.department_title, { name: selectedDetailDepartmentName });
                 }
                 if (detailNoteEl) {
-                    detailNoteEl.textContent = "Use the station search below to jump to one site, or return to France when you want the national picture again.";
+                    detailNoteEl.textContent = "Use the station search below to jump to one site, or clear the department filter when you want the national picture again.";
                 }
                 renderStations(payload.rupture_stations || []);
                 setActiveDepartment(departmentCode);
@@ -508,7 +506,6 @@ async function loadBootData() {
                 if (stationSearchEl) {
                     stationSearchEl.value = "";
                 }
-                pendingStationSelection = pendingStationSelection || null;
                 if (departmentEl) {
                     departmentEl.value = nextCode;
                 }
@@ -542,10 +539,10 @@ async function loadBootData() {
                 setActiveStation(null);
                 renderStationLegend([]);
                 if (stationChartTitleEl) {
-                    stationChartTitleEl.textContent = fuelwiseCopy.station_chart.title;
+                    stationChartTitleEl.textContent = shortageify(fuelwiseCopy.station_chart.title);
                 }
                 if (stationChartNoteEl) {
-                    stationChartNoteEl.textContent = fuelwiseCopy.station_chart.note;
+                    stationChartNoteEl.textContent = shortageify(fuelwiseCopy.station_chart.note);
                 }
                 if (stationChartValueEl) {
                     stationChartValueEl.textContent = "0";
@@ -559,12 +556,11 @@ async function loadBootData() {
                 }
                 if (stationChartEmptyEl) {
                     stationChartEmptyEl.hidden = false;
-                    stationChartEmptyEl.textContent = fuelwiseCopy.station_chart.empty;
+                    stationChartEmptyEl.textContent = shortageify(fuelwiseCopy.station_chart.empty);
                 }
                 if (stationChartTooltipEl) {
                     stationChartTooltipEl.hidden = true;
                 }
-                renderJourney();
             }
 
             function resetDetail(payload) {
@@ -1182,7 +1178,7 @@ async function loadBootData() {
                     stationChartEl.innerHTML = "";
                     stationChartEl.setAttribute("hidden", "hidden");
                     stationChartEmptyEl.hidden = false;
-                    stationChartEmptyEl.textContent = fuelwiseCopy.station_chart.no_data;
+                    stationChartEmptyEl.textContent = shortageify(fuelwiseCopy.station_chart.no_data);
                     if (stationChartTooltipEl) {
                         stationChartTooltipEl.hidden = true;
                     }
@@ -1852,7 +1848,7 @@ async function loadBootData() {
                     stationChartTitleEl.textContent = replaceTokens(fuelwiseCopy.station_chart.station_title, { station: selectedStationName });
                 }
                 if (stationChartNoteEl) {
-                    stationChartNoteEl.textContent = fuelwiseCopy.station_chart.loading_note;
+                    stationChartNoteEl.textContent = shortageify(fuelwiseCopy.station_chart.loading_note);
                 }
                 if (stationChartEl) {
                     stationChartEl.innerHTML = "";
@@ -1860,7 +1856,7 @@ async function loadBootData() {
                 }
                 if (stationChartEmptyEl) {
                     stationChartEmptyEl.hidden = false;
-                    stationChartEmptyEl.textContent = fuelwiseCopy.station_chart.loading;
+                    stationChartEmptyEl.textContent = shortageify(fuelwiseCopy.station_chart.loading);
                 }
                 renderStationLegend([]);
                 if (stationTrendRequest) {
@@ -1892,10 +1888,10 @@ async function loadBootData() {
                         });
                     }
                     if (stationChartNoteEl) {
-                        stationChartNoteEl.textContent = replaceTokens(fuelwiseCopy.station_chart.showing, {
+                        stationChartNoteEl.textContent = shortageify(replaceTokens(fuelwiseCopy.station_chart.showing, {
                             days: payload.days || 30,
                             total: payload.totals?.period_total || 0
-                        });
+                        }));
                     }
                     renderStationChart(payload);
                 } catch (error) {
@@ -1906,7 +1902,7 @@ async function loadBootData() {
                         stationChartTitleEl.textContent = replaceTokens(fuelwiseCopy.station_chart.station_title, { station: selectedStationName });
                     }
                     if (stationChartNoteEl) {
-                        stationChartNoteEl.textContent = fuelwiseCopy.station_chart.failed_note;
+                        stationChartNoteEl.textContent = shortageify(fuelwiseCopy.station_chart.failed_note);
                     }
                     if (stationChartEl) {
                         stationChartEl.innerHTML = "";
@@ -1914,7 +1910,7 @@ async function loadBootData() {
                     }
                     if (stationChartEmptyEl) {
                         stationChartEmptyEl.hidden = false;
-                        stationChartEmptyEl.textContent = fuelwiseCopy.station_chart.failed;
+                        stationChartEmptyEl.textContent = shortageify(fuelwiseCopy.station_chart.failed);
                     }
                 } finally {
                     if (stationTrendRequest === requestController) {
@@ -1945,6 +1941,7 @@ async function loadBootData() {
                 renderDepartments(payload);
                 renderPriority(payload);
                 renderBars(payload);
+                renderActiveFilters(payload);
                 syncScopedDetail(payload);
                 if (selectedStationId && !detailStations.some((station) => Number(station.station_id) === Number(selectedStationId))) {
                     resetStationChart();
@@ -1955,7 +1952,6 @@ async function loadBootData() {
                 renderPriceChart();
                 mapController.sync(payload.rupture_map_stations || []);
                 updateUrlFromPayload(payload);
-                renderJourney();
             }
 
             function rerenderChartsForViewport() {
@@ -2021,13 +2017,6 @@ async function loadBootData() {
             });
             fuelEl?.addEventListener("change", refreshDashboard);
             departmentEl?.addEventListener("change", refreshDashboard);
-            resetFranceEl?.addEventListener("click", () => {
-                applyDepartmentFilter("", fuelwiseCopy.filters?.all_france || "France");
-            });
-            clearStationEl?.addEventListener("click", () => {
-                resetStationChart();
-                renderJourney();
-            });
             stationSearchEl?.addEventListener("input", (event) => {
                 stationSearchTerm = String(event.target.value || "");
                 renderStations(detailStations, { store: false });
@@ -2038,6 +2027,21 @@ async function loadBootData() {
                     stationSearchEl.value = "";
                 }
                 renderStations(detailStations, { store: false });
+            });
+            activeFiltersEl?.addEventListener("click", (event) => {
+                const badgeEl = event.target.closest(".filter-badge");
+                if (!badgeEl) {
+                    return;
+                }
+                if (badgeEl.dataset.filterKind === "fuel" && fuelEl) {
+                    fuelEl.value = "all";
+                }
+                if (badgeEl.dataset.filterKind === "department" && departmentEl) {
+                    departmentEl.value = "";
+                    pendingStationSelection = null;
+                    resetStationChart();
+                }
+                refreshDashboard();
             });
 
             departmentsBodyEl?.addEventListener("click", (event) => {

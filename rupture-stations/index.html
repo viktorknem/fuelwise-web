@@ -40,45 +40,8 @@
                         <option value="">Loading departments…</option>
                     </select>
                 </label>
-                <p class="panel-note">These filters apply to the whole page.</p>
+                <div class="filter-badges" id="fuelwise-active-filters" hidden></div>
             </form>
-        </section>
-
-        <section class="panel journey-panel">
-            <div class="panel-header">
-                <div>
-                    <p class="eyebrow">How To Use It</p>
-                    <h2>Follow the shortage trail</h2>
-                </div>
-                <p class="panel-note">Start from France, drill into one department, then find the station you need without losing your place.</p>
-            </div>
-            <div class="journey-grid">
-                <article class="journey-step" data-journey-stage="1">
-                    <span class="journey-index">1</span>
-                    <strong>See issues across France</strong>
-                    <p>Read the national map first. Darker departments mean more stations affected.</p>
-                </article>
-                <article class="journey-step" data-journey-stage="2">
-                    <span class="journey-index">2</span>
-                    <strong>Zoom into one department</strong>
-                    <p>Click the map, a department row, or a focus chip to lock the page onto that area.</p>
-                </article>
-                <article class="journey-step" data-journey-stage="3">
-                    <span class="journey-index">3</span>
-                    <strong>Find one station fast</strong>
-                    <p>Use the station list and search field, then clear the focus with one click when you are done.</p>
-                </article>
-            </div>
-            <div class="scope-rail">
-                <div>
-                    <span class="scope-rail-label">Current path</span>
-                    <strong id="fuelwise-current-path">France</strong>
-                </div>
-                <div class="scope-rail-actions">
-                    <button type="button" class="ghost-button" id="fuelwise-reset-france">Back to France</button>
-                    <button type="button" class="ghost-button" id="fuelwise-clear-station">Clear station focus</button>
-                </div>
-            </div>
         </section>
 
         <section class="metrics-grid">
@@ -259,9 +222,9 @@
                 <div class="panel-header">
                     <div>
                         <p class="eyebrow">Station trend</p>
-                        <h2 id="fuelwise-station-chart-title">Rupture instances by day</h2>
+                        <h2 id="fuelwise-station-chart-title">Shortage instances by day</h2>
                     </div>
-                    <p class="panel-note" id="fuelwise-station-chart-note">Click a station to see a 30-day stacked breakdown by fuel.</p>
+                    <p class="panel-note" id="fuelwise-station-chart-note">Click a station to see a 30-day stacked breakdown by fuel shortage.</p>
                 </div>
                 <div class="chart-controls">
                     <div class="chart-legend" id="fuelwise-station-chart-legend" aria-label="Fuel stacks"></div>
@@ -275,8 +238,8 @@
                     </div>
                 </div>
                 <div class="chart-shell chart-shell-station">
-                    <svg id="fuelwise-station-chart" viewBox="0 0 960 320" preserveAspectRatio="none" role="img" aria-label="Stacked bar chart showing station rupture instances by day and fuel"></svg>
-                    <div class="chart-empty" id="fuelwise-station-chart-empty">Select a station to view its rupture history.</div>
+                    <svg id="fuelwise-station-chart" viewBox="0 0 960 320" preserveAspectRatio="none" role="img" aria-label="Stacked bar chart showing station shortage instances by day and fuel"></svg>
+                    <div class="chart-empty" id="fuelwise-station-chart-empty">Select a station to view its shortage history.</div>
                     <div class="chart-tooltip" id="fuelwise-station-chart-tooltip" hidden></div>
                 </div>
             </article>
