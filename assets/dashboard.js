@@ -1390,7 +1390,10 @@ async function loadBootData() {
 
                 function getDepartmentMetrics() {
                     const metrics = new Map();
-                    (fuelwisePayload.departments || []).forEach((department) => {
+                    const sourceDepartments = Array.isArray(fuelwisePayload.map_departments) && fuelwisePayload.map_departments.length
+                        ? fuelwisePayload.map_departments
+                        : (fuelwisePayload.departments || []);
+                    sourceDepartments.forEach((department) => {
                         metrics.set(normalizeDepartmentCode(department.code), department);
                     });
                     return metrics;
