@@ -5,9 +5,10 @@
     --text: #f6f8fb;
     --muted: #9db0c3;
     --accent: #64d3ff;
-    --critical: #ff6b57;
-    --warning: #ffbf47;
-    --stable: #46d29e;
+    --critical: #d9483b;
+    --warning: #f47f3d;
+    --stable: #ffb24a;
+    --quiet: #173247;
     --shadow: 0 24px 60px rgba(1, 7, 16, 0.45);
 }
 
@@ -46,7 +47,8 @@ body {
 .metrics-grid,
 .dashboard-grid,
 .callout,
-.chart-panel {
+.chart-panel,
+.journey-panel {
     margin-bottom: 18px;
 }
 
@@ -210,6 +212,136 @@ h2 {
     gap: 14px;
     align-items: end;
     margin-bottom: 16px;
+}
+
+.journey-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.journey-step {
+    padding: 16px 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    display: grid;
+    gap: 8px;
+    transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.journey-step strong {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1rem;
+}
+
+.journey-step p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+    font-size: 0.92rem;
+}
+
+.journey-step.is-current {
+    background: linear-gradient(180deg, rgba(244, 127, 61, 0.18), rgba(255, 178, 74, 0.08));
+    border-color: rgba(255, 178, 74, 0.4);
+    transform: translateY(-2px);
+}
+
+.journey-step.is-complete {
+    border-color: rgba(244, 127, 61, 0.24);
+    background: rgba(244, 127, 61, 0.08);
+}
+
+.journey-index {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    font-family: "Space Grotesk", sans-serif;
+    color: var(--text);
+}
+
+.scope-rail {
+    position: sticky;
+    top: 12px;
+    z-index: 8;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(8, 17, 29, 0.88), rgba(10, 23, 38, 0.78));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.scope-rail-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.scope-rail strong {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.15rem;
+}
+
+.scope-rail-actions,
+.detail-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: end;
+}
+
+.ghost-button {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 11px 16px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+.ghost-button:hover,
+.ghost-button:focus-visible {
+    background: rgba(255, 178, 74, 0.12);
+    border-color: rgba(255, 178, 74, 0.34);
+}
+
+.ghost-button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.detail-toolbar {
+    margin-bottom: 16px;
+}
+
+.station-search-control {
+    flex: 1 1 280px;
+}
+
+.station-search-control input {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 12px 14px;
+    font: inherit;
 }
 
 .control {
@@ -449,20 +581,25 @@ h2 {
 
 .status-critical,
 .area-chip-critical {
-    background: rgba(255, 107, 87, 0.18);
-    color: #ffd4cc;
+    background: rgba(217, 72, 59, 0.2);
+    color: #ffd7cf;
 }
 
 .status-warning,
 .area-chip-warning {
-    background: rgba(255, 191, 71, 0.18);
-    color: #ffe7af;
+    background: rgba(244, 127, 61, 0.2);
+    color: #ffe0cf;
 }
 
 .status-stable,
 .area-chip-stable {
-    background: rgba(70, 210, 158, 0.18);
-    color: #cbffea;
+    background: rgba(255, 178, 74, 0.2);
+    color: #ffecbf;
+}
+
+.area-chip-muted {
+    background: rgba(23, 50, 71, 0.72);
+    color: #c7d6e2;
 }
 
 .map-legend {
@@ -497,6 +634,10 @@ h2 {
 
 .legend-stable {
     background: var(--stable);
+}
+
+.legend-muted {
+    background: var(--quiet);
 }
 
 .france-map .leaflet-container {
@@ -617,7 +758,7 @@ th {
 .department-row:hover,
 .department-row:focus-visible,
 .department-row.is-active {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(244, 127, 61, 0.08);
 }
 
 .station-item {
@@ -631,7 +772,7 @@ th {
 .station-item:hover,
 .station-item:focus-visible,
 .station-item.is-active {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(244, 127, 61, 0.1);
 }
 
 .chip-list {
@@ -648,7 +789,7 @@ th {
 }
 
 .department-chip.is-active {
-    outline: 2px solid rgba(100, 211, 255, 0.35);
+    outline: 2px solid rgba(255, 178, 74, 0.42);
     outline-offset: 1px;
 }
 
@@ -688,15 +829,15 @@ th {
 }
 
 .bar-fill-critical {
-    background: linear-gradient(90deg, rgba(255, 107, 87, 0.85), rgba(255, 107, 87, 0.45));
+    background: linear-gradient(90deg, rgba(217, 72, 59, 0.88), rgba(217, 72, 59, 0.45));
 }
 
 .bar-fill-warning {
-    background: linear-gradient(90deg, rgba(255, 191, 71, 0.85), rgba(255, 191, 71, 0.45));
+    background: linear-gradient(90deg, rgba(244, 127, 61, 0.88), rgba(244, 127, 61, 0.45));
 }
 
 .bar-fill-stable {
-    background: linear-gradient(90deg, rgba(70, 210, 158, 0.85), rgba(70, 210, 158, 0.45));
+    background: linear-gradient(90deg, rgba(255, 178, 74, 0.88), rgba(255, 178, 74, 0.45));
 }
 
 .station-row {
@@ -750,12 +891,18 @@ th {
     .hero,
     .metrics-grid,
     .dashboard-grid,
-    .bottom-grid {
+    .bottom-grid,
+    .journey-grid {
         grid-template-columns: 1fr;
     }
 
     .hero-meta {
         align-items: flex-start;
+    }
+
+    .scope-rail {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     .chart-stat {
@@ -815,6 +962,11 @@ th {
         gap: 12px;
     }
 
+    .detail-toolbar,
+    .scope-rail-actions {
+        width: 100%;
+    }
+
     .control {
         min-width: 0;
         width: 100%;
@@ -823,6 +975,12 @@ th {
     .control select {
         min-height: 46px;
         font-size: 0.95rem;
+    }
+
+    .station-search-control input,
+    .ghost-button {
+        width: 100%;
+        min-height: 46px;
     }
 
     .chart-legend {

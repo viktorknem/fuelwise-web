@@ -44,6 +44,43 @@
             </form>
         </section>
 
+        <section class="panel journey-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">How To Use It</p>
+                    <h2>Follow the shortage trail</h2>
+                </div>
+                <p class="panel-note">Start from France, drill into one department, then find the station you need without losing your place.</p>
+            </div>
+            <div class="journey-grid">
+                <article class="journey-step" data-journey-stage="1">
+                    <span class="journey-index">1</span>
+                    <strong>See issues across France</strong>
+                    <p>Read the national map first. Darker departments mean more stations affected.</p>
+                </article>
+                <article class="journey-step" data-journey-stage="2">
+                    <span class="journey-index">2</span>
+                    <strong>Zoom into one department</strong>
+                    <p>Click the map, a department row, or a focus chip to lock the page onto that area.</p>
+                </article>
+                <article class="journey-step" data-journey-stage="3">
+                    <span class="journey-index">3</span>
+                    <strong>Find one station fast</strong>
+                    <p>Use the station list and search field, then clear the focus with one click when you are done.</p>
+                </article>
+            </div>
+            <div class="scope-rail">
+                <div>
+                    <span class="scope-rail-label">Current path</span>
+                    <strong id="fuelwise-current-path">France</strong>
+                </div>
+                <div class="scope-rail-actions">
+                    <button type="button" class="ghost-button" id="fuelwise-reset-france">Back to France</button>
+                    <button type="button" class="ghost-button" id="fuelwise-clear-station">Clear station focus</button>
+                </div>
+            </div>
+        </section>
+
         <section class="metrics-grid">
             <article class="metric-card">
                 <span class="metric-label">Total stations</span>
@@ -130,7 +167,7 @@
                         <p class="eyebrow">Map</p>
                         <h2>Stations with shortages in France</h2>
                     </div>
-                    <p class="panel-note">Each point shows a station with one or more affected fuel types.</p>
+                    <p class="panel-note">Start with the France heat map, then click a department to switch into station view.</p>
                 </div>
                 <div class="france-map">
                     <div id="fuelwise-france-map" class="france-map-canvas" aria-label="Map of France showing stations with shortages"></div>
@@ -138,7 +175,8 @@
                     <div class="map-legend" id="fuelwise-map-legend">
                         <span><i class="legend-dot legend-critical"></i> 25%+ of stations affected</span>
                         <span><i class="legend-dot legend-warning"></i> 12% to 25% affected</span>
-                        <span><i class="legend-dot legend-stable"></i> Under 12% affected</span>
+                        <span><i class="legend-dot legend-stable"></i> 0% to 12% affected</span>
+                        <span><i class="legend-dot legend-muted"></i> No active shortage signal</span>
                     </div>
                 </div>
             </article>
@@ -204,6 +242,13 @@
                         <h2 id="fuelwise-detail-title">Recent affected stations</h2>
                     </div>
                     <p class="panel-note" id="fuelwise-detail-note">Click a department to see the stations behind the totals.</p>
+                </div>
+                <div class="detail-toolbar">
+                    <label class="control station-search-control">
+                        <span>Find a station</span>
+                        <input type="search" id="fuelwise-station-search" placeholder="Search by station, city, or address">
+                    </label>
+                    <button type="button" class="ghost-button" id="fuelwise-clear-station-search">Clear search</button>
                 </div>
                 <div class="station-list" id="fuelwise-station-detail-list">
                     <p class="empty-state">Loading station detail…</p>

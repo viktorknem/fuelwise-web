@@ -53,6 +53,11 @@ async function loadBootData() {
             const formEl = document.getElementById("fuelwise-global-filter-form");
             const fuelEl = document.getElementById("fuelwise-global-fuel-filter");
             const departmentEl = document.getElementById("fuelwise-global-department-filter");
+            const currentPathEl = document.getElementById("fuelwise-current-path");
+            const resetFranceEl = document.getElementById("fuelwise-reset-france");
+            const clearStationEl = document.getElementById("fuelwise-clear-station");
+            const stationSearchEl = document.getElementById("fuelwise-station-search");
+            const clearStationSearchEl = document.getElementById("fuelwise-clear-station-search");
             const heroScopeEl = document.getElementById("fuelwise-hero-scope");
             const heroSummaryEl = document.getElementById("fuelwise-hero-summary");
             const sourcePillEl = document.getElementById("fuelwise-source-pill");
@@ -121,6 +126,8 @@ async function loadBootData() {
 
             let selectedDetailDepartmentCode = "";
             let selectedDetailDepartmentName = "";
+            let detailStations = [];
+            let stationSearchTerm = "";
             let dashboardRequest = null;
             let selectedStationId = null;
             let selectedStationName = "";
@@ -128,6 +135,7 @@ async function loadBootData() {
             let pendingStationSelection = null;
             let currentStationTrendPayload = null;
             let resizeFrame = null;
+            const journeyStepEls = Array.from(document.querySelectorAll(".journey-step"));
 
             function isPhoneViewport() {
                 return window.matchMedia("(max-width: 640px)").matches;
@@ -241,6 +249,43 @@ async function loadBootData() {
 
             function normalizeDepartmentCode(value) {
                 return String(value || "").trim().toUpperCase();
+            }
+
+            function currentJourneyStage() {
+                if (selectedStationId) {
+                    return 3;
+                }
+                if (fuelwisePayload?.filters?.department_code) {
+                    return 2;
+                }
+                return 1;
+            }
+
+            function renderJourney() {
+                const scopeDepartmentName = fuelwisePayload?.scope?.department_name || selectedDetailDepartmentName || "";
+                const parts = [fuelwiseCopy.filters?.all_france || "France"];
+                if (fuelwisePayload?.filters?.department_code) {
+                    parts.push(scopeDepartmentName || fuelwisePayload.filters.department_code);
+                }
+                if (selectedStationId && selectedStationName) {
+                    parts.push(selectedStationName);
+                }
+                if (currentPathEl) {
+                    currentPathEl.textContent = parts.join(" / ");
+                }
+                const stage = currentJourneyStage();
+                journeyStepEls.forEach((el) => {
+                    const step = Number(el.dataset.journeyStage || 0);
+                    el.classList.toggle("is-current", step === stage);
+                    el.classList.toggle("is-complete", step < stage);
+                });
+                if (resetFranceEl) {
+                    const canResetFrance = Boolean(fuelwisePayload?.filters?.department_code);
+                    resetFranceEl.disabled = !canResetFrance;
+                }
+                if (clearStationEl) {
+                    clearStationEl.disabled = !selectedStationId;
+                }
             }
 
             function scopeText(payload) {
@@ -377,15 +422,25 @@ async function loadBootData() {
                 `).join("");
             }
 
-            function renderStations(stations) {
+            function renderStations(stations, { store = true } = {}) {
+                if (store) {
+                    detailStations = Array.isArray(stations) ? stations : [];
+                }
+                const visibleStations = getVisibleDetailStations();
+                if (stationSearchEl) {
+                    stationSearchEl.disabled = !detailStations.length;
+                }
+                if (clearStationSearchEl) {
+                    clearStationSearchEl.disabled = !stationSearchTerm;
+                }
                 if (!detailListEl) {
                     return;
                 }
-                if (!Array.isArray(stations) || !stations.length) {
-                    detailListEl.innerHTML = `<p class="empty-state">${escapeHtml(fuelwiseCopy.detail.empty)}</p>`;
+                if (!visibleStations.length) {
+                    detailListEl.innerHTML = `<p class="empty-state">${escapeHtml(stationSearchTerm ? "No stations match this search in the current scope." : fuelwiseCopy.detail.empty)}</p>`;
                     return;
                 }
-                detailListEl.innerHTML = stations.map((station) => {
+                detailListEl.innerHTML = visibleStations.map((station) => {
                     const location = [station.city || "", station.address || ""].filter(Boolean).join(" · ");
                     const fuels = Array.from(new Set((Array.isArray(station.fuel_list) ? station.fuel_list : []).map((fuel) => displayFuelName(fuel))));
                     return `
@@ -400,6 +455,7 @@ async function loadBootData() {
                         </div>
                     `;
                 }).join("");
+                setActiveStation(selectedStationId);
             }
 
             function setActiveStation(stationId) {
@@ -416,6 +472,47 @@ async function loadBootData() {
                 }
                 const stationEl = detailListEl?.querySelector(`.station-item[data-station-id="${String(stationId)}"]`);
                 stationEl?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+
+            function syncScopedDetail(payload) {
+                const departmentCode = normalizeDepartmentCode(payload.filters?.department_code);
+                if (!departmentCode) {
+                    resetDetail(payload);
+                    return;
+                }
+                selectedDetailDepartmentCode = departmentCode;
+                selectedDetailDepartmentName = payload.scope?.department_name || departmentCode;
+                stationSearchTerm = "";
+                if (stationSearchEl) {
+                    stationSearchEl.value = "";
+                    stationSearchEl.disabled = false;
+                }
+                if (clearStationSearchEl) {
+                    clearStationSearchEl.disabled = true;
+                }
+                if (detailTitleEl) {
+                    detailTitleEl.textContent = replaceTokens(fuelwiseCopy.detail.department_title, { name: selectedDetailDepartmentName });
+                }
+                if (detailNoteEl) {
+                    detailNoteEl.textContent = "Use the station search below to jump to one site, or return to France when you want the national picture again.";
+                }
+                renderStations(payload.rupture_stations || []);
+                setActiveDepartment(departmentCode);
+            }
+
+            function applyDepartmentFilter(code, name) {
+                const nextCode = normalizeDepartmentCode(code);
+                selectedDetailDepartmentCode = nextCode;
+                selectedDetailDepartmentName = name || "";
+                stationSearchTerm = "";
+                if (stationSearchEl) {
+                    stationSearchEl.value = "";
+                }
+                pendingStationSelection = pendingStationSelection || null;
+                if (departmentEl) {
+                    departmentEl.value = nextCode;
+                }
+                refreshDashboard();
             }
 
             function renderStationLegend(fuelTypes) {
@@ -467,18 +564,28 @@ async function loadBootData() {
                 if (stationChartTooltipEl) {
                     stationChartTooltipEl.hidden = true;
                 }
+                renderJourney();
             }
 
             function resetDetail(payload) {
                 selectedDetailDepartmentCode = "";
                 selectedDetailDepartmentName = "";
+                detailStations = Array.isArray(payload.rupture_stations) ? payload.rupture_stations : [];
+                stationSearchTerm = "";
+                if (stationSearchEl) {
+                    stationSearchEl.value = "";
+                    stationSearchEl.disabled = !detailStations.length;
+                }
+                if (clearStationSearchEl) {
+                    clearStationSearchEl.disabled = true;
+                }
                 if (detailTitleEl) {
                     detailTitleEl.textContent = fuelwiseCopy.detail.title;
                 }
                 if (detailNoteEl) {
                     detailNoteEl.textContent = fuelwiseCopy.detail.note;
                 }
-                renderStations(payload.rupture_stations || []);
+                renderStations(detailStations, { store: false });
                 setActiveDepartment("");
                 resetStationChart();
             }
@@ -490,6 +597,22 @@ async function loadBootData() {
                     if (el.classList.contains("department-row")) {
                         el.setAttribute("aria-selected", isActive ? "true" : "false");
                     }
+                });
+            }
+
+            function getVisibleDetailStations() {
+                const needle = stationSearchTerm.trim().toLowerCase();
+                if (!needle) {
+                    return detailStations;
+                }
+                return detailStations.filter((station) => {
+                    const haystack = [
+                        station.name,
+                        station.city,
+                        station.address,
+                        station.department_name
+                    ].filter(Boolean).join(" ").toLowerCase();
+                    return haystack.includes(needle);
                 });
             }
 
@@ -1204,7 +1327,8 @@ async function loadBootData() {
                 const departmentLegendItems = [
                     { className: "legend-critical", label: "25%+ of stations affected" },
                     { className: "legend-warning", label: "12% to 25% affected" },
-                    { className: "legend-stable", label: "Under 12% affected" }
+                    { className: "legend-stable", label: "0% to 12% affected" },
+                    { className: "legend-muted", label: "No active shortage signal" }
                 ];
 
                 function loadStylesheet(href) {
@@ -1283,13 +1407,13 @@ async function loadBootData() {
                 function getDepartmentFillColor(issueRate) {
                     const value = Number(issueRate || 0);
                     if (value >= 25) {
-                        return "#ff6b57";
+                        return "#d9483b";
                     }
                     if (value >= 12) {
-                        return "#ffbf47";
+                        return "#f47f3d";
                     }
                     if (value > 0) {
-                        return "#46d29e";
+                        return "#ffb24a";
                     }
                     return "#173247";
                 }
@@ -1362,12 +1486,7 @@ async function loadBootData() {
                                 click() {
                                     const nextCode = code;
                                     const nextName = feature?.properties?.nom || metrics?.name || nextCode;
-                                    if (departmentEl) {
-                                        departmentEl.value = nextCode;
-                                    }
-                                    selectedDetailDepartmentCode = nextCode;
-                                    selectedDetailDepartmentName = nextName;
-                                    refreshDashboard();
+                                    applyDepartmentFilter(nextCode, nextName);
                                 }
                             });
                         }
@@ -1382,9 +1501,9 @@ async function loadBootData() {
                     const franceBounds = getMainlandBounds();
                     const stationBounds = [];
                     const colorByStatus = {
-                        critical: "#ff6b57",
-                        warning: "#ffbf47",
-                        stable: "#46d29e"
+                        critical: "#d9483b",
+                        warning: "#f47f3d",
+                        stable: "#ffb24a"
                     };
 
                     stations.forEach((station) => {
@@ -1697,6 +1816,7 @@ async function loadBootData() {
                 const stationId = Number(station.station_id);
                 const stationName = station.name || fuelwiseCopy.common_station;
                 const departmentCode = station.department_code || "";
+                const currentDepartmentCode = normalizeDepartmentCode(fuelwisePayload.filters?.department_code);
                 const stationAlreadyVisible = detailListEl?.querySelector(`.station-item[data-station-id="${String(stationId)}"]`);
 
                 if (stationAlreadyVisible) {
@@ -1705,14 +1825,14 @@ async function loadBootData() {
                     return;
                 }
 
-                if (departmentCode) {
+                if (departmentCode && normalizeDepartmentCode(departmentCode) !== currentDepartmentCode) {
                     pendingStationSelection = {
                         stationId,
                         stationName,
                         departmentCode,
                     };
                     const departmentName = station.department_name || station.city || departmentCode;
-                    await loadDepartmentDetail(departmentCode, departmentName);
+                    applyDepartmentFilter(departmentCode, departmentName);
                     return;
                 }
 
@@ -1825,11 +1945,17 @@ async function loadBootData() {
                 renderDepartments(payload);
                 renderPriority(payload);
                 renderBars(payload);
-                resetDetail(payload);
+                syncScopedDetail(payload);
+                if (selectedStationId && !detailStations.some((station) => Number(station.station_id) === Number(selectedStationId))) {
+                    resetStationChart();
+                } else if (selectedStationId) {
+                    setActiveStation(selectedStationId);
+                }
                 renderShortageChart();
                 renderPriceChart();
                 mapController.sync(payload.rupture_map_stations || []);
                 updateUrlFromPayload(payload);
+                renderJourney();
             }
 
             function rerenderChartsForViewport() {
@@ -1868,6 +1994,16 @@ async function loadBootData() {
                     }
                     const payload = await response.json();
                     renderAll(payload);
+                    if (pendingStationSelection) {
+                        const matchingStation = (payload.rupture_stations || []).find(
+                            (station) => Number(station.station_id) === Number(pendingStationSelection.stationId)
+                        );
+                        if (matchingStation) {
+                            scrollStationIntoView(matchingStation.station_id);
+                            await loadStationTrend(matchingStation.station_id, pendingStationSelection.stationName || matchingStation.name);
+                        }
+                        pendingStationSelection = null;
+                    }
                 } catch (error) {
                     if (error.name !== "AbortError") {
                         console.error("fuelwise dashboard refresh failed", error);
@@ -1885,24 +2021,42 @@ async function loadBootData() {
             });
             fuelEl?.addEventListener("change", refreshDashboard);
             departmentEl?.addEventListener("change", refreshDashboard);
+            resetFranceEl?.addEventListener("click", () => {
+                applyDepartmentFilter("", fuelwiseCopy.filters?.all_france || "France");
+            });
+            clearStationEl?.addEventListener("click", () => {
+                resetStationChart();
+                renderJourney();
+            });
+            stationSearchEl?.addEventListener("input", (event) => {
+                stationSearchTerm = String(event.target.value || "");
+                renderStations(detailStations, { store: false });
+            });
+            clearStationSearchEl?.addEventListener("click", () => {
+                stationSearchTerm = "";
+                if (stationSearchEl) {
+                    stationSearchEl.value = "";
+                }
+                renderStations(detailStations, { store: false });
+            });
 
             departmentsBodyEl?.addEventListener("click", (event) => {
                 const rowEl = event.target.closest(".department-row");
                 if (rowEl) {
-                    loadDepartmentDetail(rowEl.dataset.departmentCode, rowEl.dataset.departmentName);
+                    applyDepartmentFilter(rowEl.dataset.departmentCode, rowEl.dataset.departmentName);
                 }
             });
             departmentsBodyEl?.addEventListener("keydown", (event) => {
                 const rowEl = event.target.closest(".department-row");
                 if (rowEl && (event.key === "Enter" || event.key === " ")) {
                     event.preventDefault();
-                    loadDepartmentDetail(rowEl.dataset.departmentCode, rowEl.dataset.departmentName);
+                    applyDepartmentFilter(rowEl.dataset.departmentCode, rowEl.dataset.departmentName);
                 }
             });
             chipListEl?.addEventListener("click", (event) => {
                 const chipEl = event.target.closest(".department-chip");
                 if (chipEl) {
-                    loadDepartmentDetail(chipEl.dataset.departmentCode, chipEl.dataset.departmentName);
+                    applyDepartmentFilter(chipEl.dataset.departmentCode, chipEl.dataset.departmentName);
                 }
             });
             detailListEl?.addEventListener("click", (event) => {
