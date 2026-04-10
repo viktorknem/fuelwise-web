@@ -54,6 +54,8 @@ async function loadBootData() {
             const fuelEl = document.getElementById("fuelwise-global-fuel-filter");
             const departmentEl = document.getElementById("fuelwise-global-department-filter");
             const timeframeEl = document.getElementById("fuelwise-global-timeframe-filter");
+            const timeframeLabelEl = document.getElementById("fuelwise-timeframe-label");
+            const timeframeDatesEl = document.getElementById("fuelwise-timeframe-dates");
             const activeFiltersEl = document.getElementById("fuelwise-active-filters");
             const stationSearchEl = document.getElementById("fuelwise-station-search");
             const clearStationSearchEl = document.getElementById("fuelwise-clear-station-search");
@@ -140,9 +142,17 @@ async function loadBootData() {
             let currentStationTrendPayload = null;
             let resizeFrame = null;
             let franceReferenceTotalStations = null;
+            const timeframeOptions = [
+                { step: "0", value: "all", label: "All history" },
+                { step: "1", value: "90", label: "Last 90 days" },
+                { step: "2", value: "30", label: "Last 30 days" },
+                { step: "3", value: "7", label: "Last 7 days" }
+            ];
+            const stationFuelPriority = ["SP98", "Gazole", "SP95", "E10", "E85", "GPLc", "Unknown"];
             const initialQuery = new URLSearchParams(window.location.search);
             if (timeframeEl && initialQuery.has("timeframe")) {
-                timeframeEl.value = initialQuery.get("timeframe") || "all";
+                const matchedTimeframe = timeframeOptions.find((option) => option.value === (initialQuery.get("timeframe") || "all"));
+                timeframeEl.value = matchedTimeframe?.step || "0";
             }
 
             function isPhoneViewport() {
@@ -259,13 +269,13 @@ async function loadBootData() {
 
             function formatDeltaLabel(current, previous) {
                 if (previous === null || previous === undefined) {
-                    return "Not enough history";
+                    return "-> Not enough history";
                 }
                 const delta = Number(current || 0) - Number(previous || 0);
                 if (Math.abs(delta) < 0.05) {
-                    return "Flat";
+                    return "-> 0.0 pts";
                 }
-                return `${delta > 0 ? "Up" : "Down"} ${Math.abs(delta).toFixed(1)} pts`;
+                return `${delta > 0 ? "↑" : "↓"} ${Math.abs(delta).toFixed(1)} pts`;
             }
 
             function displayFuelName(value) {
@@ -284,17 +294,49 @@ async function loadBootData() {
                 return String(value || "").trim().toUpperCase();
             }
 
+            function getSelectedTimeframeValue() {
+                const rawStep = String(timeframeEl?.value || "0");
+                return timeframeOptions.find((option) => option.step === rawStep)?.value || "all";
+            }
+
             function getSelectedTimeframeDays() {
-                const rawValue = String(timeframeEl?.value || "all");
+                const rawValue = getSelectedTimeframeValue();
                 return rawValue === "all" ? null : Math.max(1, Number(rawValue) || 30);
             }
 
             function getSelectedTimeframeLabel() {
-                const days = getSelectedTimeframeDays();
-                if (!days) {
-                    return "All history";
+                return timeframeOptions.find((option) => option.value === getSelectedTimeframeValue())?.label || "All history";
+            }
+
+            function formatDateRangeLabel(startDate, endDate) {
+                if (!startDate || !endDate) {
+                    return "Showing the full available range";
                 }
-                return `Last ${days} days`;
+                return `${startDate} to ${endDate}`;
+            }
+
+            function updateTimeframeSummary() {
+                if (timeframeLabelEl) {
+                    timeframeLabelEl.textContent = getSelectedTimeframeLabel();
+                }
+                if (!timeframeDatesEl) {
+                    return;
+                }
+                const baseSeries = Array.isArray(fuelwisePayload?.time_series?.series?.all)
+                    ? fuelwisePayload.time_series.series.all
+                    : [];
+                const visibleSeries = sliceSeriesWindow(baseSeries, getSelectedTimeframeDays());
+                const firstDate = visibleSeries[0]?.date || baseSeries[0]?.date || "";
+                const lastDate = visibleSeries[visibleSeries.length - 1]?.date || baseSeries[baseSeries.length - 1]?.date || "";
+                timeframeDatesEl.textContent = formatDateRangeLabel(firstDate, lastDate);
+            }
+
+            function orderedFuelTypes(fuelTypes) {
+                const uniqueFuelTypes = Array.from(new Set((fuelTypes || []).filter(Boolean)));
+                return [
+                    ...stationFuelPriority.filter((fuelType) => uniqueFuelTypes.includes(fuelType)),
+                    ...uniqueFuelTypes.filter((fuelType) => !stationFuelPriority.includes(fuelType))
+                ];
             }
 
             function sliceSeriesWindow(points, days) {
@@ -339,7 +381,7 @@ async function loadBootData() {
                 if (getSelectedTimeframeDays()) {
                     badges.push({
                         kind: "timeframe",
-                        value: String(getSelectedTimeframeDays()),
+                        value: getSelectedTimeframeValue(),
                         label: `Trend window: ${getSelectedTimeframeLabel()}`
                     });
                 }
@@ -367,6 +409,7 @@ async function loadBootData() {
             }
 
             function renderHero(payload) {
+                updateTimeframeSummary();
                 if (heroScopeEl) {
                     heroScopeEl.textContent = scopeText(payload);
                 }
@@ -507,6 +550,7 @@ async function loadBootData() {
                     <button
                         type="button"
                         class="bar-row"
+                        data-department-code="${escapeHtml(item.code || "")}"
                         data-department-name="${escapeHtml(item.label || "")}"
                     >
                         <div class="bar-label">${escapeHtml(item.label || "")}</div>
@@ -619,11 +663,12 @@ async function loadBootData() {
                 if (!stationChartLegendEl) {
                     return;
                 }
-                if (!Array.isArray(fuelTypes) || !fuelTypes.length) {
+                const sortedFuelTypes = orderedFuelTypes(fuelTypes);
+                if (!sortedFuelTypes.length) {
                     stationChartLegendEl.innerHTML = "";
                     return;
                 }
-                stationChartLegendEl.innerHTML = fuelTypes.map((fuelType) => `
+                stationChartLegendEl.innerHTML = sortedFuelTypes.map((fuelType) => `
                     <span class="chart-legend-item">
                         <i class="chart-legend-swatch" style="--swatch:${escapeHtml(stationSeriesColors[fuelType] || stationSeriesColors.Unknown)}"></i>
                         ${escapeHtml(displayFuelName(fuelType))}
@@ -750,6 +795,29 @@ async function loadBootData() {
                     started = true;
                     return `${command} ${x.toFixed(2)} ${y.toFixed(2)}`;
                 }).filter(Boolean).join(" ");
+            }
+
+            function buildStationSegmentPath(x, y, width, height, roundTop, roundBottom, radius) {
+                const effectiveHeight = Math.max(height, 0);
+                const effectiveRadius = Math.min(radius, width / 2, effectiveHeight / 2);
+                const topLeft = roundTop ? effectiveRadius : 0;
+                const topRight = roundTop ? effectiveRadius : 0;
+                const bottomRight = roundBottom ? effectiveRadius : 0;
+                const bottomLeft = roundBottom ? effectiveRadius : 0;
+                const right = x + width;
+                const bottom = y + effectiveHeight;
+                return [
+                    `M ${x + topLeft} ${y}`,
+                    `L ${right - topRight} ${y}`,
+                    topRight ? `Q ${right} ${y} ${right} ${y + topRight}` : `L ${right} ${y}`,
+                    `L ${right} ${bottom - bottomRight}`,
+                    bottomRight ? `Q ${right} ${bottom} ${right - bottomRight} ${bottom}` : `L ${right} ${bottom}`,
+                    `L ${x + bottomLeft} ${bottom}`,
+                    bottomLeft ? `Q ${x} ${bottom} ${x} ${bottom - bottomLeft}` : `L ${x} ${bottom}`,
+                    `L ${x} ${y + topLeft}`,
+                    topLeft ? `Q ${x} ${y} ${x + topLeft} ${y}` : `L ${x} ${y}`,
+                    "Z"
+                ].join(" ");
             }
 
             function renderShortageLegend(seriesEntries) {
@@ -1278,7 +1346,7 @@ async function loadBootData() {
                 const stationPadding = chartConfig.padding;
                 setChartViewport(stationChartEl, chartConfig);
                 const series = Array.isArray(payload?.series) ? payload.series : [];
-                const fuelTypes = (Array.isArray(payload?.fuel_types) ? payload.fuel_types : []).filter((fuelType) => fuelType !== "SP95");
+                const fuelTypes = orderedFuelTypes((Array.isArray(payload?.fuel_types) ? payload.fuel_types : []).filter((fuelType) => fuelType !== "SP95"));
                 const maxTotal = Math.max(...series.map((item) => Number(item.total || 0)), 1);
 
                 renderStationLegend(fuelTypes);
@@ -1329,24 +1397,22 @@ async function loadBootData() {
                 const barMarkup = series.map((point, index) => {
                     const x = stationPadding.left + (stepWidth * index) + ((stepWidth - barWidth) / 2);
                     let runningHeight = 0;
-                    const segments = fuelTypes.map((fuelType) => {
+                    const visibleSegments = fuelTypes.filter((fuelType) => Number(point.segments?.[fuelType] || 0) > 0);
+                    const segmentCount = visibleSegments.length;
+                    const segments = visibleSegments.map((fuelType, segmentIndex) => {
                         const value = Number(point.segments?.[fuelType] || 0);
-                        if (!value) {
-                            return "";
-                        }
                         const segmentHeight = ((stationChartHeight - stationPadding.top - stationPadding.bottom) * value) / Math.max(maxTotal, 1);
                         const y = stationChartHeight - stationPadding.bottom - runningHeight - segmentHeight;
                         runningHeight += segmentHeight;
+                        const isBottom = segmentIndex === 0;
+                        const isTop = segmentIndex === segmentCount - 1;
+                        const radius = 4;
                         return `
-                            <rect
-                                x="${x}"
-                                y="${y}"
-                                width="${barWidth}"
-                                height="${segmentHeight}"
-                                rx="4"
-                                ry="4"
+                            <path
+                                class="station-bar-segment"
+                                d="${buildStationSegmentPath(x, y, barWidth, segmentHeight, isTop, isBottom, radius)}"
                                 fill="${escapeHtml(stationSeriesColors[fuelType] || stationSeriesColors.Unknown)}"
-                            ></rect>
+                            ></path>
                         `;
                     }).join("");
                     return `
@@ -2135,7 +2201,8 @@ async function loadBootData() {
             });
             fuelEl?.addEventListener("change", refreshDashboard);
             departmentEl?.addEventListener("change", refreshDashboard);
-            timeframeEl?.addEventListener("change", async () => {
+            async function handleTimeframeChange() {
+                updateTimeframeSummary();
                 renderActiveFilters(fuelwisePayload);
                 renderShortageChart();
                 renderPriceChart();
@@ -2145,7 +2212,10 @@ async function loadBootData() {
                 } else {
                     resetStationChart();
                 }
-            });
+            }
+
+            timeframeEl?.addEventListener("input", handleTimeframeChange);
+            timeframeEl?.addEventListener("change", handleTimeframeChange);
             stationSearchEl?.addEventListener("input", (event) => {
                 stationSearchTerm = String(event.target.value || "");
                 renderStations(detailStations, { store: false });
@@ -2171,16 +2241,8 @@ async function loadBootData() {
                     resetStationChart();
                 }
                 if (badgeEl.dataset.filterKind === "timeframe" && timeframeEl) {
-                    timeframeEl.value = "all";
-                    renderActiveFilters(fuelwisePayload);
-                    renderShortageChart();
-                    renderPriceChart();
-                    updateUrlFromPayload(fuelwisePayload);
-                    if (selectedStationId) {
-                        loadStationTrend(selectedStationId, selectedStationName);
-                    } else {
-                        resetStationChart();
-                    }
+                    timeframeEl.value = "0";
+                    handleTimeframeChange();
                     return;
                 }
                 refreshDashboard();
@@ -2210,7 +2272,9 @@ async function loadBootData() {
                 if (!barEl) {
                     return;
                 }
-                const match = (fuelwisePayload.departments || []).find((department) => department.name === barEl.dataset.departmentName);
+                const match = (fuelwisePayload.departments || []).find((department) =>
+                    department.code === barEl.dataset.departmentCode || department.name === barEl.dataset.departmentName
+                );
                 if (match) {
                     applyDepartmentFilter(match.code, match.name);
                 }

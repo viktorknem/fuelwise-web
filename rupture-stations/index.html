@@ -40,14 +40,21 @@
                         <option value="">Loading departments…</option>
                     </select>
                 </label>
-                <label class="control">
+                <label class="control control-slider">
                     <span>Trend window</span>
-                    <select name="timeframe" id="fuelwise-global-timeframe-filter">
-                        <option value="all">All history</option>
-                        <option value="90">Last 90 days</option>
-                        <option value="30">Last 30 days</option>
-                        <option value="7">Last 7 days</option>
-                    </select>
+                    <div class="timeframe-slider-shell">
+                        <div class="timeframe-slider-header">
+                            <strong id="fuelwise-timeframe-label">All history</strong>
+                            <span id="fuelwise-timeframe-dates">Showing the full available range</span>
+                        </div>
+                        <input type="range" name="timeframe" id="fuelwise-global-timeframe-filter" min="0" max="3" step="1" value="0" aria-describedby="fuelwise-timeframe-dates">
+                        <div class="timeframe-slider-scale" aria-hidden="true">
+                            <span>All</span>
+                            <span>90d</span>
+                            <span>30d</span>
+                            <span>7d</span>
+                        </div>
+                    </div>
                 </label>
                 <div class="filter-badges" id="fuelwise-active-filters" hidden></div>
             </form>
@@ -157,7 +164,7 @@
                 </div>
             </article>
 
-            <article class="panel">
+            <article class="panel compare-panel">
                 <div class="panel-header">
                     <div>
                         <p class="eyebrow">Compare</p>

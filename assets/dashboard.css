@@ -183,7 +183,8 @@ h2 {
 }
 
 .dashboard-grid {
-    grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
 }
 
 .detail-grid {
@@ -312,6 +313,59 @@ h2 {
     border-radius: 14px;
     padding: 12px 14px;
     font: inherit;
+}
+
+.control-slider {
+    flex: 1 1 320px;
+}
+
+.timeframe-slider-shell {
+    display: grid;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.timeframe-slider-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+}
+
+.timeframe-slider-header strong {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1rem;
+}
+
+.timeframe-slider-header span {
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+#fuelwise-global-timeframe-filter {
+    width: 100%;
+    margin: 0;
+    accent-color: var(--warning);
+}
+
+.timeframe-slider-scale {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.timeframe-slider-scale span:nth-child(2),
+.timeframe-slider-scale span:nth-child(3) {
+    text-align: center;
+}
+
+.timeframe-slider-scale span:last-child {
+    text-align: right;
 }
 
 .chart-stat {
@@ -500,6 +554,7 @@ h2 {
 
 .france-map {
     position: relative;
+    height: 420px;
     min-height: 420px;
     border-radius: 22px;
     background:
@@ -510,6 +565,7 @@ h2 {
 
 .france-map-canvas {
     width: 100%;
+    height: 420px;
     min-height: 420px;
 }
 
@@ -683,9 +739,18 @@ th {
 .bar-chart {
     display: grid;
     gap: 14px;
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.compare-panel {
+    display: flex;
+    flex-direction: column;
 }
 
 .bar-row {
+    appearance: none;
     display: grid;
     grid-template-columns: minmax(110px, 0.9fr) 1.8fr auto;
     gap: 12px;
@@ -694,6 +759,10 @@ th {
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    width: 100%;
     cursor: pointer;
     transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
@@ -788,6 +857,10 @@ th {
 
 .station-bar-group.is-active rect:not(.station-bar-hover) {
     filter: brightness(1.08);
+}
+
+.station-bar-segment {
+    stroke: none;
 }
 
 .fuel-tags {
@@ -895,6 +968,15 @@ th {
         font-size: 0.95rem;
     }
 
+    .timeframe-slider-shell {
+        padding: 11px 12px;
+    }
+
+    .timeframe-slider-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
     .station-search-control input,
     .ghost-button {
         width: 100%;
@@ -995,7 +1077,9 @@ th {
     }
 
     .france-map,
-    .france-shape {
+    .france-shape,
+    .france-map-canvas {
+        height: 360px;
         min-height: 360px;
     }
 
