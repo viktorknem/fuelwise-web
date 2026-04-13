@@ -726,13 +726,13 @@ h2 {
 .chart-tick text,
 .chart-x-label {
     fill: var(--muted);
-    font-size: 11px;
+    font-size: 13px;
     font-family: "Manrope", sans-serif;
 }
 
 .chart-axis-label {
     fill: rgba(141, 164, 184, 0.85);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     font-family: "Manrope", sans-serif;
@@ -1153,13 +1153,24 @@ th {
         flex-wrap: wrap;
     }
 
+    /* Panel header: let copy and stats stack so neither gets squashed */
+    .panel-header {
+        flex-wrap: wrap;
+    }
+
     .panel-stats {
         gap: 14px;
+        flex-wrap: wrap;
+        width: 100%;
     }
 
     .chart-stat {
         align-items: flex-start;
     }
+
+    /* SVG text: slightly larger on tablet since viewBox=960 renders ~640px wide (0.67x scale) */
+    .chart-tick text,
+    .chart-x-label { font-size: 15px; }
 }
 
 @media (max-width: 640px) {
@@ -1172,64 +1183,144 @@ th {
     .panel,
     .metric-card {
         border-radius: 16px;
-        padding: 18px;
+        padding: 16px;
     }
 
-    .hero { padding: 20px 18px; }
+    .hero { padding: 18px 16px; }
 
-    h1 { font-size: clamp(1.6rem, 7vw, 2.2rem); }
+    h1 { font-size: clamp(1.5rem, 6.5vw, 2rem); }
 
-    .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    h2 { font-size: 1.05rem; }
 
-    .metric-value { font-size: clamp(1.6rem, 8vw, 2.2rem); }
-
-    .panel-header { flex-wrap: wrap; }
-
-    .panel-stats {
-        flex-wrap: wrap;
+    /* ── Metrics: 2-col on phone ── */
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
         gap: 10px;
-        width: 100%;
     }
 
-    .chart-stat { align-items: flex-start; }
+    .metric-value { font-size: clamp(1.5rem, 7vw, 2rem); }
 
-    .chart-stat strong { font-size: 1.4rem; }
+    .metric-foot { font-size: 0.75rem; }
 
+    /* ── Panel headers: stack vertically on phone ── */
+    .panel-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .panel-note { max-width: none; }
+
+    /* Stats row: horizontal scroll, left-aligned values */
+    .panel-stats {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 0;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        scrollbar-width: none;
+    }
+
+    .panel-stats::-webkit-scrollbar { display: none; }
+
+    .chart-stat {
+        align-items: flex-start;
+        flex: 0 0 auto;
+        padding-right: 20px;
+        border-right: 1px solid rgba(255, 255, 255, 0.07);
+        margin-right: 20px;
+    }
+
+    .chart-stat:last-child {
+        border-right: none;
+        margin-right: 0;
+        padding-right: 0;
+    }
+
+    .chart-stat strong { font-size: 1.3rem; }
+
+    /* ── Filter bar ── */
     .filter-row { gap: 12px; }
-
     .filter-group { width: 100%; }
-
     .control { min-width: 0; width: 100%; }
-
     .control select,
     .filter-combobox-input { min-height: 44px; font-size: 0.92rem; }
-
     .control-heading { flex-direction: column; align-items: flex-start; gap: 3px; }
 
-    .chart-legend { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
-
+    /* ── Chart legend ── */
+    .chart-legend {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+    }
+    .chart-legend::-webkit-scrollbar { display: none; }
     .chart-legend-item { flex: 0 0 auto; white-space: nowrap; }
 
-    .chart-shell { min-height: 240px; }
+    /* ── Chart shells: fixed height, preserve SVG aspect ratio ── */
+    .chart-shell { min-height: 0; }
 
     #fuelwise-chart,
     #fuelwise-price-chart,
-    #fuelwise-station-chart,
-    .chart-shell-station svg { height: 240px; }
+    #fuelwise-station-chart {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 640 / 260;
+        display: block;
+    }
 
-    .chart-tooltip { min-width: 140px; padding: 7px 9px; font-size: 0.78rem; }
+    .chart-shell-station svg {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 640 / 260;
+        display: block;
+    }
 
+    /* Scale up SVG text so it stays readable after the viewBox downscale */
+    .chart-tick text,
+    .chart-x-label { font-size: 18px; }
+
+    .chart-axis-label { font-size: 15px; }
+
+    .chart-tooltip {
+        min-width: 130px;
+        max-width: min(220px, calc(100% - 16px));
+        padding: 7px 9px;
+        font-size: 0.78rem;
+    }
+
+    /* ── Map ── */
     .france-map,
-    .france-map-canvas { height: 320px; min-height: 320px; }
+    .france-map-canvas { height: 300px; min-height: 300px; }
 
+    /* ── Bar chart ── */
     .bar-row { grid-template-columns: 1fr; gap: 6px; }
 
+    /* ── Station panel ── */
+    .panel-header-search { flex-direction: column; gap: 10px; }
     .detail-header-search { width: 100%; flex-wrap: wrap; }
-
     .station-search-control input,
     .ghost-button { min-height: 44px; }
 
-    .page-header { padding: 0; }
+    .station-table-shell { max-height: 360px; }
 
-    .page-header-status { gap: 8px; }
+    /* ── Page header ── */
+    .page-header { padding: 0; gap: 10px; }
+    .page-header-status { gap: 8px; flex-wrap: wrap; }
+
+    /* ── Hero chips: horizontal scroll ── */
+    .hero-chips {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 6px;
+        width: 100%;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+    }
+    .hero-chips::-webkit-scrollbar { display: none; }
+    .hero-chips > * { flex: 0 0 auto; }
 }
