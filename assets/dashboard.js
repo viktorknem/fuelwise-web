@@ -1,4 +1,5 @@
 const apiBase = window.FUELWISE_CONFIG?.apiBase || "/api/fuelwise";
+const departmentBoundariesUrl = new URL("./departements-1000m.geojson", import.meta.url);
 
 let fuelwisePayload = null;
 let fuelwiseCopy = null;
@@ -1674,7 +1675,7 @@ async function loadBootData() {
                     if (departmentGeoJson) {
                         return departmentGeoJson;
                     }
-                    const response = await fetch("/assets/departements-1000m.geojson", {
+                    const response = await fetch(departmentBoundariesUrl, {
                         headers: { "Accept": "application/json" }
                     });
                     if (!response.ok) {
