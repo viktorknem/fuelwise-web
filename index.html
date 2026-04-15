@@ -3,67 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FuelWise | Fuel shortages and smarter refuelling</title>
-    <meta name="description" content="FuelWise is the mobile companion for smarter refuelling in France, with a public web dashboard for rupture monitoring during fuel stress events.">
+    <title>FuelWise — Smarter refuelling in France</title>
+    <meta name="description" content="FuelWise finds you the cheapest fuel nearby or on your route, tracks your car's range, and monitors shortage alerts across France. Free on iOS.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/site.css">
 </head>
 <body>
-    <main class="site-shell">
-        <section class="hero-card">
-            <div class="hero-copy">
-                <p class="eyebrow">
-                    <img src="/assets/logo.png" alt="" class="hero-logo" aria-hidden="true">
-                    FuelWise
-                </p>
-                <h1>Know where fuel pressure is rising before it changes your route.</h1>
-                <p class="lead">
-                    FuelWise helps drivers spot better refuelling options on mobile, while this web experience tracks rupture stations in France during exceptional supply stress.
-                </p>
-                <div class="hero-actions">
-                    <a class="button button-primary" href="/rupture-stations">Open rupture dashboard</a>
-                    <a class="button button-secondary" href="https://www.voppy.app/api/fuelwise/health">Backend health</a>
+
+    <nav class="nav" id="nav">
+        <div class="nav-inner">
+            <a href="/" class="nav-logo" aria-label="FuelWise home">
+                <img src="/assets/logo.png" alt="FuelWise" class="nav-logo-img">
+                <span class="nav-logo-text">FuelWise</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#screenshots" class="nav-link">App</a>
+                <a href="#download" class="nav-link">Download</a>
+                <a href="/rupture-stations" class="nav-link nav-link-dim">Shortage monitor</a>
+            </div>
+            <a href="#download" class="nav-cta">Get the app</a>
+        </div>
+    </nav>
+
+    <main>
+
+        <section class="hero" id="hero">
+            <div class="hero-bg">
+                <div class="hero-orb hero-orb-1"></div>
+                <div class="hero-orb hero-orb-2"></div>
+                <div class="hero-orb hero-orb-3"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-copy reveal">
+                    <div class="hero-badge">
+                        <span class="hero-badge-dot"></span>
+                        Free on iOS · France
+                    </div>
+                    <h1 class="hero-h1">
+                        Fuel smarter.<br>
+                        <span class="grad-text">Drive further.</span>
+                    </h1>
+                    <p class="hero-lead">
+                        FuelWise finds the cheapest station nearby or on your route, tracks how far your car can go, and alerts you when shortages spread.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="#download" class="btn btn-primary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                            Download on the App Store
+                        </a>
+                        <a href="/rupture-stations" class="btn btn-ghost">
+                            View shortage monitor
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-phone-wrap reveal reveal-delay-1">
+                    <div class="hero-phone">
+                        <div class="phone-shell">
+                            <div class="phone-notch"></div>
+                            <div class="phone-screen">
+                                <img src="/assets/IMG_3304.PNG" alt="FuelWise home screen" class="phone-img" id="heroPhoneImg">
+                            </div>
+                        </div>
+                        <div class="phone-glow"></div>
+                    </div>
                 </div>
             </div>
-            <div class="hero-panel">
-                <div class="signal-card">
-                    <span class="signal-label">Mobile app</span>
-                    <strong>Find practical refuelling options</strong>
-                    <p>Built for in-car decision making, with routing-oriented backend recommendations staying inside Voppy.</p>
+            <div class="hero-scroll-hint" aria-hidden="true">
+                <span></span>
+            </div>
+        </section>
+
+        <section class="stats-band">
+            <div class="stats-inner">
+                <div class="stat reveal">
+                    <span class="stat-value grad-text">10 000+</span>
+                    <span class="stat-label">stations tracked</span>
                 </div>
-                <div class="signal-card">
-                    <span class="signal-label">Web monitor</span>
-                    <strong>Track rupture stations</strong>
-                    <p>A dedicated public dashboard for exceptional shortage scenarios, deployed separately on Vercel.</p>
+                <div class="stat-divider" aria-hidden="true"></div>
+                <div class="stat reveal reveal-delay-1">
+                    <span class="stat-value grad-text">Live</span>
+                    <span class="stat-label">price updates</span>
+                </div>
+                <div class="stat-divider" aria-hidden="true"></div>
+                <div class="stat reveal reveal-delay-2">
+                    <span class="stat-value grad-text">Free</span>
+                    <span class="stat-label">no subscription</span>
+                </div>
+                <div class="stat-divider" aria-hidden="true"></div>
+                <div class="stat reveal reveal-delay-3">
+                    <span class="stat-value grad-text">iOS</span>
+                    <span class="stat-label">iPhone &amp; iPad</span>
                 </div>
             </div>
         </section>
 
-        <section class="info-grid">
-            <article class="info-card">
-                <p class="eyebrow">What lives here</p>
-                <h2>Public-facing FuelWise pages</h2>
-                <p>
-                    This Vercel app hosts the branded FuelWise homepage and the rupture monitoring dashboard. It stays lightweight, fast, and easy to ship independently from the backend.
-                </p>
-            </article>
-            <article class="info-card">
-                <p class="eyebrow">What stays in Voppy</p>
-                <h2>Backend-only FuelWise API</h2>
-                <p>
-                    The `fuelwise/` subfolder remains the source of truth for scraping, database access, dashboard data assembly, and REST endpoints consumed by both the mobile app and this web frontend.
-                </p>
-            </article>
-            <article class="info-card">
-                <p class="eyebrow">Rupture page</p>
-                <h2>Built for high-stress moments</h2>
-                <p>
-                    The rupture stations page is focused on visibility: where shortages are spreading, which Departements are under pressure, and which stations are currently affected.
-                </p>
-            </article>
+        <section class="features" id="features">
+            <div class="section-wrap">
+                <div class="section-header reveal">
+                    <p class="section-eyebrow">Features</p>
+                    <h2 class="section-h2">Everything you need at the pump.</h2>
+                    <p class="section-sub">Built for French roads. Optimised for your wallet.</p>
+                </div>
+
+                <div class="feature-bento">
+
+                    <div class="bento-card bento-large reveal">
+                        <div class="bento-copy">
+                            <span class="bento-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+                            </span>
+                            <h3>Cheapest nearby</h3>
+                            <p>See every station within range ranked by price per litre for your exact fuel type, with precise walking and driving times.</p>
+                        </div>
+                        <div class="bento-visual bento-visual-nearby">
+                            <img src="/assets/IMG_3306.PNG" alt="Cheapest nearby screen" class="bento-screenshot">
+                        </div>
+                    </div>
+
+                    <div class="bento-card bento-sm reveal reveal-delay-1">
+                        <span class="bento-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l5-5 4 4 9-9"/><path d="M21 21H3V3"/></svg>
+                        </span>
+                        <h3>Price history</h3>
+                        <p>30-day charts per fuel type so you can spot trends and time your fill-up.</p>
+                    </div>
+
+                    <div class="bento-card bento-sm reveal reveal-delay-2">
+                        <span class="bento-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+                        </span>
+                        <h3>My cars</h3>
+                        <p>Save tank size and fuel type. FuelWise calculates real savings for your exact car.</p>
+                    </div>
+
+                    <div class="bento-card bento-large bento-large-right reveal">
+                        <div class="bento-copy">
+                            <span class="bento-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                            </span>
+                            <h3>Shortage alerts</h3>
+                            <p>When supply stress hits France, FuelWise surfaces which departments and stations are running dry — before you hit the queue.</p>
+                        </div>
+                        <div class="bento-visual bento-visual-station">
+                            <img src="/assets/IMG_3307.PNG" alt="Station detail screen" class="bento-screenshot">
+                        </div>
+                    </div>
+
+                    <div class="bento-card bento-wide reveal">
+                        <div class="bento-wide-copy">
+                            <span class="bento-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            </span>
+                            <h3>Savings calculated for you</h3>
+                            <p>Every search shows you exactly how much you save to fill your full tank versus the nearest station. Not cents — euros.</p>
+                        </div>
+                        <div class="bento-wide-stat">
+                            <span class="bento-big-number grad-text">€3.02</span>
+                            <span class="bento-big-label">saved on a 53L tank</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </section>
+
+        <section class="screenshots" id="screenshots">
+            <div class="section-wrap">
+                <div class="section-header reveal">
+                    <p class="section-eyebrow">The app</p>
+                    <h2 class="section-h2">Designed for the road.</h2>
+                    <p class="section-sub">Clean, fast, and easy to read at a glance — even in bright sunlight.</p>
+                </div>
+                <div class="screenshot-strip">
+                    <div class="screenshot-track" id="screenshotTrack">
+                        <div class="screenshot-item reveal">
+                            <div class="phone-frame">
+                                <img src="/assets/IMG_3304.PNG" alt="FuelWise home screen — favourite stations and quick actions">
+                                <div class="phone-frame-overlay"></div>
+                            </div>
+                            <p class="screenshot-caption">Home</p>
+                        </div>
+                        <div class="screenshot-item reveal reveal-delay-1">
+                            <div class="phone-frame">
+                                <img src="/assets/IMG_3306.PNG" alt="Cheapest nearby — ranked station list with savings">
+                                <div class="phone-frame-overlay"></div>
+                            </div>
+                            <p class="screenshot-caption">Cheapest nearby</p>
+                        </div>
+                        <div class="screenshot-item reveal reveal-delay-2">
+                            <div class="phone-frame">
+                                <img src="/assets/IMG_3307.PNG" alt="Station detail with price history chart">
+                                <div class="phone-frame-overlay"></div>
+                            </div>
+                            <p class="screenshot-caption">Station detail</p>
+                        </div>
+                        <div class="screenshot-item reveal reveal-delay-3">
+                            <div class="phone-frame">
+                                <img src="/assets/IMG_3308.PNG" alt="My cars — saved vehicles with fuel type and range">
+                                <div class="phone-frame-overlay"></div>
+                            </div>
+                            <p class="screenshot-caption">My cars</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="marquee-section" aria-hidden="true">
+            <div class="marquee-track">
+                <div class="marquee-content">
+                    <span>Cheapest nearby</span><span class="marquee-dot">·</span>
+                    <span>Price history</span><span class="marquee-dot">·</span>
+                    <span>My cars</span><span class="marquee-dot">·</span>
+                    <span>Shortage alerts</span><span class="marquee-dot">·</span>
+                    <span>Real savings</span><span class="marquee-dot">·</span>
+                    <span>Live prices</span><span class="marquee-dot">·</span>
+                    <span>10 000+ stations</span><span class="marquee-dot">·</span>
+                    <span>Cheapest on route</span><span class="marquee-dot">·</span>
+                    <span>Favourite stations</span><span class="marquee-dot">·</span>
+                    <span>France-wide data</span><span class="marquee-dot">·</span>
+                    <span>Cheapest nearby</span><span class="marquee-dot">·</span>
+                    <span>Price history</span><span class="marquee-dot">·</span>
+                    <span>My cars</span><span class="marquee-dot">·</span>
+                    <span>Shortage alerts</span><span class="marquee-dot">·</span>
+                    <span>Real savings</span><span class="marquee-dot">·</span>
+                    <span>Live prices</span><span class="marquee-dot">·</span>
+                    <span>10 000+ stations</span><span class="marquee-dot">·</span>
+                    <span>Cheapest on route</span><span class="marquee-dot">·</span>
+                    <span>Favourite stations</span><span class="marquee-dot">·</span>
+                    <span>France-wide data</span><span class="marquee-dot">·</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="download" id="download">
+            <div class="download-bg">
+                <div class="download-orb download-orb-1"></div>
+                <div class="download-orb download-orb-2"></div>
+            </div>
+            <div class="download-inner">
+                <div class="download-copy reveal">
+                    <img src="/assets/logo.png" alt="" class="download-logo" aria-hidden="true">
+                    <h2 class="download-h2">Start saving<br><span class="grad-text">at every fill-up.</span></h2>
+                    <p class="download-sub">Free to download. No account required. Works anywhere in France.</p>
+                    <div class="download-actions">
+                        <a href="#" class="store-btn" aria-label="Download on the App Store">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                            <div class="store-btn-text">
+                                <span class="store-btn-sub">Download on the</span>
+                                <span class="store-btn-main">App Store</span>
+                            </div>
+                        </a>
+                    </div>
+                    <p class="download-note">iOS 16.0 or later required</p>
+                </div>
+                <div class="download-phone reveal reveal-delay-1">
+                    <div class="phone-shell phone-shell-sm">
+                        <div class="phone-notch"></div>
+                        <div class="phone-screen">
+                            <img src="/assets/IMG_3306.PNG" alt="Cheapest nearby screen" class="phone-img">
+                        </div>
+                    </div>
+                    <div class="phone-glow phone-glow-sm"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-link">
+            <div class="dashboard-link-inner reveal">
+                <div class="dashboard-link-copy">
+                    <p class="section-eyebrow">Web monitor</p>
+                    <h3>Tracking fuel shortages across France.</h3>
+                    <p>When supply stress hits, our public dashboard maps which departments and stations are affected in real time.</p>
+                    <a href="/rupture-stations" class="btn btn-outline">
+                        Open shortage monitor
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+                <div class="dashboard-link-preview">
+                    <img src="/assets/Screenshot_2026-04-15_at_19.39.35.png" alt="FuelWise shortage monitor dashboard" class="dashboard-preview-img">
+                    <div class="dashboard-preview-overlay"></div>
+                </div>
+            </div>
+        </section>
+
     </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <a href="/" class="footer-logo" aria-label="FuelWise home">
+                <img src="/assets/logo.png" alt="" class="footer-logo-img" aria-hidden="true">
+                <span class="footer-logo-text">FuelWise</span>
+            </a>
+            <nav class="footer-nav" aria-label="Footer navigation">
+                <a href="#features">Features</a>
+                <a href="#screenshots">App</a>
+                <a href="#download">Download</a>
+                <a href="/rupture-stations">Shortage monitor</a>
+            </nav>
+            <p class="footer-copy">&copy; 2026 FuelWise. Made in France.</p>
+        </div>
+    </footer>
+
+    <script type="module" src="/assets/site.js"></script>
 </body>
 </html>
