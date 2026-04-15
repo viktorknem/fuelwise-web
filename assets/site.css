@@ -907,3 +907,759 @@ img { display: block; max-width: 100%; }
     .bento-card { padding: 24px; }
     .bento-wide { padding: 28px; }
 }
+
+/* ─── Mock UI shared base ──────────────────────────────────── */
+.mock {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(160deg, #1e1440 0%, #160e30 40%, #100828 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    padding: 14px 12px 10px;
+    font-family: "Manrope", sans-serif;
+    color: #f2eeff;
+}
+
+/* ─── Hero home mock ───────────────────────────────────────── */
+.mock-home {
+    gap: 0;
+    padding: 16px 14px 12px;
+}
+.mock-home-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.mock-home-logo img {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+}
+.mock-home-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    background: linear-gradient(135deg, #4B6FFF, #C840E9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.mock-car-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(139,79,255,0.16);
+    border: 1px solid rgba(139,79,255,0.26);
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+}
+.mock-car-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: rgba(139,79,255,0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.mock-car-icon svg { width: 16px; height: 16px; color: #b89fff; }
+.mock-car-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+.mock-car-name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.mock-car-sub { font-size: 0.62rem; color: rgba(255,255,255,0.5); }
+.mock-car-range {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+.mock-car-range-val {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    background: linear-gradient(135deg, #4B6FFF, #C840E9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.mock-car-range-unit { font-size: 0.58rem; color: rgba(255,255,255,0.45); }
+.mock-fav-label,
+.mock-actions-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+}
+.mock-station-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 9px 11px;
+    margin-bottom: 10px;
+}
+.mock-station-fav {
+    border-color: rgba(139,79,255,0.3);
+    background: rgba(139,79,255,0.10);
+}
+.mock-station-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.mock-station-name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+.mock-station-addr { font-size: 0.58rem; color: rgba(255,255,255,0.45); }
+.mock-station-right {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.mock-station-price {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    background: linear-gradient(135deg, #4B6FFF, #C840E9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.mock-station-price small { font-size: 0.6rem; opacity: 0.7; -webkit-text-fill-color: rgba(200,180,255,0.6); }
+.mock-heart { width: 13px; height: 13px; }
+.mock-heart-filled { color: #e87dff; }
+.mock-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 11px;
+    padding: 9px 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-bottom: 7px;
+    cursor: default;
+}
+.mock-action-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+.mock-action-primary {
+    background: rgba(139,79,255,0.30);
+    border: 1px solid rgba(139,79,255,0.45);
+    color: #d4c4ff;
+}
+.mock-action-secondary {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.65);
+}
+.mock-pref-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+.mock-pref-chip {
+    flex: 1;
+    text-align: center;
+    padding: 6px 0;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.45);
+}
+.mock-pref-active {
+    background: rgba(75,111,255,0.30);
+    color: #a0b8ff;
+    border: 1px solid rgba(75,111,255,0.4);
+}
+
+/* ─── Cheapest nearby bento mock ───────────────────────────── */
+.mock-nearby {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 4px 16px;
+}
+.mock-nearby-station {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 14px;
+    padding: 12px 14px;
+    transition: border-color 0.2s;
+}
+.mock-nearby-best {
+    background: rgba(139,79,255,0.12);
+    border-color: rgba(139,79,255,0.30);
+}
+.mock-nearby-dim { opacity: 0.5; }
+.mock-best-badge {
+    display: inline-flex;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: rgba(139,79,255,0.30);
+    border: 1px solid rgba(139,79,255,0.45);
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #d4c4ff;
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+}
+.mock-nearby-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+.mock-nearby-name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+}
+.mock-nearby-fuel { font-size: 0.68rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+.mock-nearby-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.mock-nearby-price {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #4B6FFF, #C840E9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.mock-nearby-price small { font-size: 0.68rem; opacity: 0.65; -webkit-text-fill-color: rgba(200,180,255,0.6); }
+.mock-nearby-time {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.07);
+    padding: 2px 7px;
+    border-radius: 20px;
+}
+.mock-nearby-savings {
+    font-size: 0.68rem;
+    color: #7eddbe;
+    margin-top: 7px;
+    font-weight: 600;
+}
+
+/* ─── Sparkline bento mock ─────────────────────────────────── */
+.mock-sparkline-wrap {
+    margin-top: auto;
+    padding-top: 10px;
+}
+.mock-spark-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 4px;
+    line-height: 1;
+    float: left;
+    margin-right: 6px;
+}
+.mock-sparkline {
+    width: 100%;
+    height: 60px;
+    display: block;
+    clear: both;
+}
+.mock-spark-dates {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.3);
+    margin-top: 4px;
+}
+
+/* ─── My cars bento mock ───────────────────────────────────── */
+.mock-car-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(139,79,255,0.12);
+    border: 1px solid rgba(139,79,255,0.22);
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-top: 8px;
+}
+.mock-car-pill-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: rgba(139,79,255,0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.mock-car-pill-icon svg { width: 16px; height: 16px; color: #b89fff; }
+.mock-car-pill-name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+.mock-car-pill-sub { font-size: 0.62rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+.mock-range-bar-wrap { margin-top: 14px; }
+.mock-range-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 6px;
+}
+.mock-range-val {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4B6FFF, #C840E9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 0.78rem;
+}
+.mock-range-track {
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+}
+.mock-range-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #4B6FFF, #C840E9);
+}
+
+/* ─── Route bento mock ─────────────────────────────────────── */
+.mock-route {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 12px;
+}
+.mock-route-map {
+    width: 100%;
+    max-width: 160px;
+    height: 280px;
+}
+
+/* ─── Shortage heatmap bento mock ──────────────────────────── */
+.mock-shortage {
+    position: relative;
+    width: 200px;
+    height: 160px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    overflow: hidden;
+}
+.mock-shortage-dots { position: absolute; inset: 0; }
+.mock-dept {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+.mock-dept-ok { background: rgba(70,210,158,0.55); box-shadow: 0 0 8px rgba(70,210,158,0.3); }
+.mock-dept-warn { background: rgba(244,127,61,0.65); box-shadow: 0 0 8px rgba(244,127,61,0.35); }
+.mock-dept-crit { background: rgba(224,67,85,0.75); box-shadow: 0 0 10px rgba(224,67,85,0.45); }
+.mock-dept-pulse { animation: dept-pulse 2s ease-in-out infinite; }
+@keyframes dept-pulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(224,67,85,0.4); transform: translate(-50%,-50%) scale(1); }
+    50% { box-shadow: 0 0 22px rgba(224,67,85,0.7); transform: translate(-50%,-50%) scale(1.25); }
+}
+.mock-shortage-legend {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+.mock-legend-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* ─── Phone frame mock UIs (screenshot strip) ──────────────── */
+.phone-frame .mock {
+    border-radius: 30px;
+    padding: 10px 10px 8px;
+    height: 100%;
+    font-size: 0.7rem;
+}
+.mph-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.mph-back {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1;
+    flex-shrink: 0;
+}
+.mph-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    flex: 1;
+}
+.mph-logo {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+.mph-logo img {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+}
+.mph-header > span:last-child:not(.mph-title):not(.mph-back) {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    background: linear-gradient(135deg, #4B6FFF, #C840E9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.mph-card {
+    background: rgba(139,79,255,0.14);
+    border: 1px solid rgba(139,79,255,0.22);
+    border-radius: 11px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+}
+.mph-car-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.mph-car-icon { font-size: 0.9rem; flex-shrink: 0; }
+.mph-car-name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+}
+.mph-car-sub { font-size: 0.56rem; color: rgba(255,255,255,0.45); margin-top: 1px; }
+.mph-section-label {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 5px;
+}
+.mph-fav-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 7px 8px;
+    margin-bottom: 6px;
+}
+.mph-fav-name { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 0.7rem; }
+.mph-fav-sub { font-size: 0.54rem; color: rgba(255,255,255,0.4); margin-top: 1px; }
+.mph-fav-price {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    background: linear-gradient(135deg, #4B6FFF, #C840E9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.mph-fav-price span { font-size: 0.52rem; opacity: 0.65; -webkit-text-fill-color: rgba(200,180,255,0.6); }
+.mph-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 9px;
+    padding: 7px 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    cursor: default;
+}
+.mph-btn-primary {
+    background: rgba(139,79,255,0.28);
+    border: 1px solid rgba(139,79,255,0.42);
+    color: #d4c4ff;
+}
+.mph-btn-secondary {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.09);
+    color: rgba(255,255,255,0.6);
+}
+.mph-chips { display: flex; gap: 5px; }
+.mph-chip {
+    flex: 1;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 7px;
+    font-size: 0.58rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.4);
+}
+.mph-chip-active {
+    background: rgba(75,111,255,0.28);
+    color: #a0b8ff;
+    border: 1px solid rgba(75,111,255,0.4);
+}
+.mph-location-bar {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 9px;
+    padding: 7px 9px;
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+}
+.mph-find-btn {
+    background: rgba(139,79,255,0.24);
+    border: 1px solid rgba(139,79,255,0.36);
+    border-radius: 9px;
+    padding: 7px;
+    text-align: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #d4c4ff;
+    margin-bottom: 8px;
+}
+.mph-result {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 11px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+}
+.mph-result-best {
+    background: rgba(139,79,255,0.10);
+    border-color: rgba(139,79,255,0.26);
+}
+.mph-result-badge {
+    display: inline-flex;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: rgba(139,79,255,0.28);
+    border: 1px solid rgba(139,79,255,0.42);
+    font-size: 0.56rem;
+    font-weight: 700;
+    color: #d4c4ff;
+    margin-bottom: 5px;
+}
+.mph-result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+}
+.mph-result-name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+}
+.mph-heart { width: 11px; height: 11px; color: rgba(255,255,255,0.4); }
+.mph-result-big-price {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    background: linear-gradient(135deg, #4B6FFF, #C840E9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    margin-bottom: 4px;
+}
+.mph-result-big-price span { font-size: 0.62rem; opacity: 0.65; -webkit-text-fill-color: rgba(200,180,255,0.6); }
+.mph-price-sm { font-size: 0.82rem; }
+.mph-result-meta { display: flex; gap: 5px; align-items: center; margin-bottom: 4px; }
+.mph-fuel-chip {
+    background: rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 2px 6px;
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.6);
+}
+.mph-time-chip {
+    background: rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 2px 6px;
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.6);
+}
+.mph-result-save { font-size: 0.58rem; color: #7eddbe; font-weight: 600; }
+
+/* Station detail mock */
+.mph-map-preview {
+    margin: -10px -10px 0;
+    overflow: hidden;
+    border-radius: 0;
+    height: 70px;
+    margin-bottom: 8px;
+}
+.mph-map-preview svg { width: 100%; height: 100%; }
+.mph-station-name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+}
+.mph-station-addr { font-size: 0.56rem; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+.mph-prices { margin-bottom: 8px; }
+.mph-price-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.62rem;
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.7);
+}
+.mph-price-row:last-child { border-bottom: none; }
+.mph-chart-label {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 0.68rem;
+    margin-bottom: 5px;
+}
+.mph-chart-chips { display: flex; gap: 4px; margin-bottom: 6px; }
+.mph-chart-chip {
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.54rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.45);
+    cursor: default;
+}
+.mph-chart-chip-active {
+    background: rgba(75,111,255,0.28);
+    color: #a0b8ff;
+    border: 1px solid rgba(75,111,255,0.4);
+}
+.mph-chart { width: 100%; height: 55px; display: block; }
+
+/* Route mock phone */
+.mph-route-endpoints {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 11px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.mph-route-from,
+.mph-route-to {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.65);
+}
+.mph-route-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.mph-route-dot-from { background: #4B6FFF; }
+.mph-route-dot-to { background: #C840E9; }
+.mph-route-line-sep {
+    width: 1px;
+    height: 8px;
+    background: rgba(255,255,255,0.12);
+    margin-left: 3px;
+}
+.mph-route-vis { width: 100%; height: 140px; display: block; }
+.mph-route-best-card {
+    background: rgba(139,79,255,0.14);
+    border: 1px solid rgba(139,79,255,0.28);
+    border-radius: 11px;
+    padding: 8px 10px;
+}
+.mph-route-best-label {
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(200,180,255,0.6);
+    margin-bottom: 5px;
+}
+.mph-route-best-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ─── Download section mock (smaller font) ─────────────────── */
+.mock-dl { padding: 10px 9px 8px; }
+.mock-dl .mph-result-big-price { font-size: 0.9rem; }
+
+/* ─── Bento visual override (no image) ─────────────────────── */
+.bento-visual {
+    background: transparent;
+    padding: 0;
+    align-items: flex-start;
+    height: auto;
+    min-height: 280px;
+    overflow: visible;
+}
+.bento-large .bento-visual,
+.bento-large-right .bento-visual {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-self: stretch;
+    overflow: hidden;
+    border-radius: 18px 18px 0 0;
+    background: rgba(255,255,255,0.02);
+    min-height: 300px;
+}
+.bento-large .bento-visual .mock-nearby,
+.bento-large-right .bento-visual .mock-route {
+    padding: 16px 12px 0;
+    flex: 1;
+}

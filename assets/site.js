@@ -34,24 +34,3 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
     });
 });
 
-const phoneImgs = [
-    '/assets/IMG_3304.PNG',
-    '/assets/IMG_3306.PNG',
-    '/assets/IMG_3307.PNG',
-    '/assets/IMG_3308.PNG',
-];
-const heroImg = document.getElementById('heroPhoneImg');
-if (heroImg) {
-    let idx = 0;
-    setInterval(() => {
-        idx = (idx + 1) % phoneImgs.length;
-        heroImg.style.opacity = '0';
-        heroImg.style.transform = 'scale(1.04)';
-        setTimeout(() => {
-            heroImg.src = phoneImgs[idx];
-            heroImg.style.opacity = '1';
-            heroImg.style.transform = 'scale(1)';
-        }, 350);
-    }, 3200);
-    heroImg.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
-}

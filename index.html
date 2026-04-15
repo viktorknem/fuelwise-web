@@ -30,6 +30,7 @@
 
     <main>
 
+        <!-- ─── Hero ─────────────────────────────────────────── -->
         <section class="hero" id="hero">
             <div class="hero-bg">
                 <div class="hero-orb hero-orb-1"></div>
@@ -65,7 +66,52 @@
                         <div class="phone-shell">
                             <div class="phone-notch"></div>
                             <div class="phone-screen">
-                                <img src="/assets/IMG_3304.PNG" alt="FuelWise home screen" class="phone-img" id="heroPhoneImg">
+                                <!-- Abstract home screen UI -->
+                                <div class="mock mock-home">
+                                    <div class="mock-home-header">
+                                        <div class="mock-home-logo">
+                                            <img src="/assets/logo.png" alt="" aria-hidden="true">
+                                        </div>
+                                        <span class="mock-home-title">Fuelwise</span>
+                                    </div>
+                                    <div class="mock-car-card">
+                                        <div class="mock-car-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="10" width="22" height="7" rx="2"/><path d="M5 17v2a1 1 0 0 0 2 0v-2M17 17v2a1 1 0 0 0 2 0v-2"/><path d="M5 10l2-4h10l2 4"/></svg>
+                                        </div>
+                                        <div class="mock-car-info">
+                                            <span class="mock-car-name">Peugeot 3008</span>
+                                            <span class="mock-car-sub">53 L · SP95-E10</span>
+                                        </div>
+                                        <div class="mock-car-range">
+                                            <span class="mock-car-range-val">~412</span>
+                                            <span class="mock-car-range-unit">km</span>
+                                        </div>
+                                    </div>
+                                    <div class="mock-fav-label">Your favourite stations</div>
+                                    <div class="mock-station-card mock-station-fav">
+                                        <div class="mock-station-left">
+                                            <span class="mock-station-name">E. Leclerc</span>
+                                            <span class="mock-station-addr">Carrières-sur-Seine</span>
+                                        </div>
+                                        <div class="mock-station-right">
+                                            <span class="mock-station-price">€1.959<small>/L</small></span>
+                                            <svg class="mock-heart mock-heart-filled" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                        </div>
+                                    </div>
+                                    <div class="mock-actions-label">Where to fill up?</div>
+                                    <div class="mock-action-btn mock-action-primary">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                        Cheapest nearby
+                                    </div>
+                                    <div class="mock-action-btn mock-action-secondary">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                                        Cheapest on route
+                                    </div>
+                                    <div class="mock-pref-row">
+                                        <div class="mock-pref-chip mock-pref-active">✓ Cheap</div>
+                                        <div class="mock-pref-chip">⏱ Fast</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="phone-glow"></div>
@@ -77,6 +123,7 @@
             </div>
         </section>
 
+        <!-- ─── Stats band ────────────────────────────────────── -->
         <section class="stats-band">
             <div class="stats-inner">
                 <div class="stat reveal">
@@ -101,6 +148,7 @@
             </div>
         </section>
 
+        <!-- ─── Features ──────────────────────────────────────── -->
         <section class="features" id="features">
             <div class="section-wrap">
                 <div class="section-header reveal">
@@ -111,59 +159,199 @@
 
                 <div class="feature-bento">
 
+                    <!-- Cheapest nearby — large left -->
                     <div class="bento-card bento-large reveal">
                         <div class="bento-copy">
                             <span class="bento-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
                             </span>
                             <h3>Cheapest nearby</h3>
-                            <p>See every station within range ranked by price per litre for your exact fuel type, with precise walking and driving times.</p>
+                            <p>Every station within range, ranked by price for your exact fuel. Driving time and real savings shown upfront.</p>
                         </div>
-                        <div class="bento-visual bento-visual-nearby">
-                            <img src="/assets/IMG_3306.PNG" alt="Cheapest nearby screen" class="bento-screenshot">
+                        <div class="bento-visual">
+                            <!-- Abstract station list UI -->
+                            <div class="mock-nearby">
+                                <div class="mock-nearby-station mock-nearby-best">
+                                    <span class="mock-best-badge">Best value</span>
+                                    <div class="mock-nearby-row">
+                                        <div>
+                                            <div class="mock-nearby-name">Carrefour Market</div>
+                                            <div class="mock-nearby-fuel">SP95-E10</div>
+                                        </div>
+                                        <div class="mock-nearby-meta">
+                                            <div class="mock-nearby-price">€1.919<small>/L</small></div>
+                                            <div class="mock-nearby-time">⏱ 4.5 min</div>
+                                        </div>
+                                    </div>
+                                    <div class="mock-nearby-savings">Save €2.28 on full tank (53L)</div>
+                                </div>
+                                <div class="mock-nearby-station">
+                                    <div class="mock-nearby-row">
+                                        <div>
+                                            <div class="mock-nearby-name">Carrefour</div>
+                                            <div class="mock-nearby-fuel">SP95-E10</div>
+                                        </div>
+                                        <div class="mock-nearby-meta">
+                                            <div class="mock-nearby-price">€1.905<small>/L</small></div>
+                                            <div class="mock-nearby-time">⏱ 6.2 min</div>
+                                        </div>
+                                    </div>
+                                    <div class="mock-nearby-savings">Save €3.02 on full tank (53L)</div>
+                                </div>
+                                <div class="mock-nearby-station mock-nearby-dim">
+                                    <div class="mock-nearby-row">
+                                        <div>
+                                            <div class="mock-nearby-name">Total Access</div>
+                                            <div class="mock-nearby-fuel">SP95-E10</div>
+                                        </div>
+                                        <div class="mock-nearby-meta">
+                                            <div class="mock-nearby-price">€1.949<small>/L</small></div>
+                                            <div class="mock-nearby-time">⏱ 2.1 min</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Price history — small -->
                     <div class="bento-card bento-sm reveal reveal-delay-1">
                         <span class="bento-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l5-5 4 4 9-9"/><path d="M21 21H3V3"/></svg>
                         </span>
                         <h3>Price history</h3>
                         <p>30-day charts per fuel type so you can spot trends and time your fill-up.</p>
+                        <!-- Mini sparkline -->
+                        <div class="mock-sparkline-wrap">
+                            <div class="mock-spark-labels">
+                                <span>€2.07</span>
+                                <span>€1.97</span>
+                                <span>€1.87</span>
+                            </div>
+                            <svg class="mock-sparkline" viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true">
+                                <defs>
+                                    <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#8B4FFF" stop-opacity="0.28"/>
+                                        <stop offset="100%" stop-color="#8B4FFF" stop-opacity="0"/>
+                                    </linearGradient>
+                                </defs>
+                                <path d="M0 48 L22 42 L44 38 L66 36 L88 30 L100 26 L112 30 L130 20 L148 18 L160 20 L172 14 L186 30 L200 10" fill="none" stroke="url(#sparkGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M0 48 L22 42 L44 38 L66 36 L88 30 L100 26 L112 30 L130 20 L148 18 L160 20 L172 14 L186 30 L200 10 L200 60 L0 60Z" fill="url(#sparkFill)"/>
+                                <line x1="0" y1="32" x2="200" y2="32" stroke="#4B6FFF" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+                                <defs>
+                                    <linearGradient id="sparkGrad" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stop-color="#4B6FFF"/>
+                                        <stop offset="100%" stop-color="#C840E9"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="200" cy="10" r="3.5" fill="#C840E9"/>
+                            </svg>
+                            <div class="mock-spark-dates">
+                                <span>03/16</span>
+                                <span>04/01</span>
+                                <span>04/15</span>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- My cars — small -->
                     <div class="bento-card bento-sm reveal reveal-delay-2">
                         <span class="bento-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="10" width="22" height="7" rx="2"/><path d="M5 17v2a1 1 0 0 0 2 0v-2M17 17v2a1 1 0 0 0 2 0v-2"/><path d="M5 10l2-4h10l2 4"/></svg>
                         </span>
                         <h3>My cars</h3>
                         <p>Save tank size and fuel type. FuelWise calculates real savings for your exact car.</p>
+                        <div class="mock-car-pill">
+                            <div class="mock-car-pill-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="10" width="22" height="7" rx="2"/><path d="M5 17v2a1 1 0 0 0 2 0v-2M17 17v2a1 1 0 0 0 2 0v-2"/><path d="M5 10l2-4h10l2 4"/></svg>
+                            </div>
+                            <div>
+                                <div class="mock-car-pill-name">Peugeot 3008</div>
+                                <div class="mock-car-pill-sub">53 L · 7.5 L/100km · Essence 95</div>
+                            </div>
+                        </div>
+                        <div class="mock-range-bar-wrap">
+                            <div class="mock-range-bar-label">
+                                <span>Estimated range</span>
+                                <span class="mock-range-val">~412 km</span>
+                            </div>
+                            <div class="mock-range-track">
+                                <div class="mock-range-fill" style="width:74%"></div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Route feature — large right -->
                     <div class="bento-card bento-large bento-large-right reveal">
                         <div class="bento-copy">
+                            <span class="bento-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                            </span>
+                            <h3>Cheapest on your route</h3>
+                            <p>Find where to fill up along your drive with minimal detour — so you never overpay just for convenience.</p>
+                        </div>
+                        <div class="bento-visual">
+                            <!-- Abstract route map UI -->
+                            <div class="mock-route">
+                                <svg class="mock-route-map" viewBox="0 0 160 280" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                                    <!-- Road -->
+                                    <path d="M80 20 C80 20 60 60 65 100 C70 140 90 160 85 200 C80 240 80 265 80 265" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="18" stroke-linecap="round"/>
+                                    <path d="M80 20 C80 20 60 60 65 100 C70 140 90 160 85 200 C80 240 80 265 80 265" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2" stroke-dasharray="6 8" stroke-linecap="round"/>
+                                    <!-- Origin pin -->
+                                    <circle cx="80" cy="20" r="7" fill="#4B6FFF"/>
+                                    <circle cx="80" cy="20" r="3.5" fill="white"/>
+                                    <!-- Destination pin -->
+                                    <circle cx="80" cy="265" r="7" fill="#C840E9"/>
+                                    <circle cx="80" cy="265" r="3.5" fill="white"/>
+                                    <!-- Fuel station 1 on route -->
+                                    <g transform="translate(50, 85)">
+                                        <rect x="-24" y="-14" width="48" height="28" rx="8" fill="#1e1535" stroke="rgba(139,79,255,0.5)" stroke-width="1.2"/>
+                                        <text x="0" y="5" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="10" fill="white">€1.905</text>
+                                    </g>
+                                    <!-- Fuel station 2 on route (best) -->
+                                    <g transform="translate(105, 155)">
+                                        <rect x="-28" y="-16" width="56" height="32" rx="9" fill="#8B4FFF"/>
+                                        <text x="0" y="-2" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="700" font-size="10" fill="white">€1.879</text>
+                                        <text x="0" y="11" text-anchor="middle" font-family="Manrope, sans-serif" font-size="7" fill="rgba(255,255,255,0.75)">Best · +1.2 min</text>
+                                    </g>
+                                    <!-- Fuel pin icons -->
+                                    <text x="50" y="88" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.4)">⛽</text>
+                                    <text x="105" y="158" text-anchor="middle" font-size="9" fill="white">⛽</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Savings + shortage — wide bottom -->
+                    <div class="bento-card bento-wide reveal">
+                        <div class="bento-wide-copy">
                             <span class="bento-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                             </span>
                             <h3>Shortage alerts</h3>
                             <p>When supply stress hits France, FuelWise surfaces which departments and stations are running dry — before you hit the queue.</p>
                         </div>
-                        <div class="bento-visual bento-visual-station">
-                            <img src="/assets/IMG_3307.PNG" alt="Station detail screen" class="bento-screenshot">
-                        </div>
-                    </div>
-
-                    <div class="bento-card bento-wide reveal">
-                        <div class="bento-wide-copy">
-                            <span class="bento-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            </span>
-                            <h3>Savings calculated for you</h3>
-                            <p>Every search shows you exactly how much you save to fill your full tank versus the nearest station. Not cents — euros.</p>
-                        </div>
-                        <div class="bento-wide-stat">
-                            <span class="bento-big-number grad-text">€3.02</span>
-                            <span class="bento-big-label">saved on a 53L tank</span>
+                        <!-- Abstract France department heatmap -->
+                        <div class="mock-shortage">
+                            <div class="mock-shortage-dots">
+                                <div class="mock-dept mock-dept-ok" style="top:18%;left:22%"></div>
+                                <div class="mock-dept mock-dept-ok" style="top:12%;left:55%"></div>
+                                <div class="mock-dept mock-dept-warn" style="top:28%;left:40%"></div>
+                                <div class="mock-dept mock-dept-warn" style="top:35%;left:62%"></div>
+                                <div class="mock-dept mock-dept-crit" style="top:44%;left:30%"></div>
+                                <div class="mock-dept mock-dept-crit mock-dept-pulse" style="top:50%;left:52%"></div>
+                                <div class="mock-dept mock-dept-ok" style="top:60%;left:24%"></div>
+                                <div class="mock-dept mock-dept-warn" style="top:65%;left:45%"></div>
+                                <div class="mock-dept mock-dept-ok" style="top:72%;left:65%"></div>
+                                <div class="mock-dept mock-dept-ok" style="top:80%;left:36%"></div>
+                                <div class="mock-dept mock-dept-ok" style="top:78%;left:57%"></div>
+                                <div class="mock-dept mock-dept-ok" style="top:22%;left:75%"></div>
+                            </div>
+                            <div class="mock-shortage-legend">
+                                <span class="mock-legend-dot mock-dept-ok"></span><span>Normal</span>
+                                <span class="mock-legend-dot mock-dept-warn"></span><span>Stress</span>
+                                <span class="mock-legend-dot mock-dept-crit"></span><span>Rupture</span>
+                            </div>
                         </div>
                     </div>
 
@@ -171,6 +359,7 @@
             </div>
         </section>
 
+        <!-- ─── Screenshots (abstract phone UIs) ─────────────── -->
         <section class="screenshots" id="screenshots">
             <div class="section-wrap">
                 <div class="section-header reveal">
@@ -180,39 +369,187 @@
                 </div>
                 <div class="screenshot-strip">
                     <div class="screenshot-track" id="screenshotTrack">
+
+                        <!-- Phone 1: Home -->
                         <div class="screenshot-item reveal">
                             <div class="phone-frame">
-                                <img src="/assets/IMG_3304.PNG" alt="FuelWise home screen — favourite stations and quick actions">
+                                <div class="mock mock-phone-home">
+                                    <div class="mph-header">
+                                        <div class="mph-logo"><img src="/assets/logo.png" alt="" aria-hidden="true"></div>
+                                        <span>Fuelwise</span>
+                                    </div>
+                                    <div class="mph-card">
+                                        <div class="mph-car-row">
+                                            <div class="mph-car-icon">🚗</div>
+                                            <div>
+                                                <div class="mph-car-name">Peugeot 3008</div>
+                                                <div class="mph-car-sub">53 L · SP95-E10</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mph-section-label">Favourite stations</div>
+                                    <div class="mph-fav-card">
+                                        <div>
+                                            <div class="mph-fav-name">E. Leclerc</div>
+                                            <div class="mph-fav-sub">Carrières-sur-Seine</div>
+                                        </div>
+                                        <div class="mph-fav-price">€1.959<span>/L</span></div>
+                                    </div>
+                                    <div class="mph-section-label" style="margin-top:10px">Where to fill up?</div>
+                                    <div class="mph-btn mph-btn-primary">⛽ Cheapest nearby</div>
+                                    <div class="mph-btn mph-btn-secondary">▶ Cheapest on route</div>
+                                    <div class="mph-chips">
+                                        <div class="mph-chip mph-chip-active">✓ Cheap</div>
+                                        <div class="mph-chip">⏱ Fast</div>
+                                    </div>
+                                </div>
                                 <div class="phone-frame-overlay"></div>
                             </div>
                             <p class="screenshot-caption">Home</p>
                         </div>
+
+                        <!-- Phone 2: Cheapest nearby -->
                         <div class="screenshot-item reveal reveal-delay-1">
                             <div class="phone-frame">
-                                <img src="/assets/IMG_3306.PNG" alt="Cheapest nearby — ranked station list with savings">
+                                <div class="mock mock-phone-nearby">
+                                    <div class="mph-header">
+                                        <span class="mph-back">‹</span>
+                                        <span class="mph-title">Cheapest nearby</span>
+                                    </div>
+                                    <div class="mph-location-bar">📍 Le Mesnil-le-Roi</div>
+                                    <div class="mph-find-btn">⛽ Find stations</div>
+                                    <div class="mph-result mph-result-best">
+                                        <div class="mph-result-badge">Best value</div>
+                                        <div class="mph-result-row">
+                                            <div class="mph-result-name">Carrefour Market</div>
+                                            <svg class="mph-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l7.78-7.78a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                        </div>
+                                        <div class="mph-result-big-price">€1.919<span>/L</span></div>
+                                        <div class="mph-result-meta">
+                                            <span class="mph-fuel-chip">SP95-E10</span>
+                                            <span class="mph-time-chip">⏱ 4.5 min</span>
+                                        </div>
+                                        <div class="mph-result-save">Save €2.28 on full tank (53L)</div>
+                                    </div>
+                                    <div class="mph-result">
+                                        <div class="mph-result-row">
+                                            <div class="mph-result-name">Carrefour</div>
+                                        </div>
+                                        <div class="mph-result-big-price mph-price-sm">€1.905<span>/L</span></div>
+                                        <div class="mph-result-meta">
+                                            <span class="mph-fuel-chip">SP95-E10</span>
+                                            <span class="mph-time-chip">⏱ 6.2 min</span>
+                                        </div>
+                                        <div class="mph-result-save">Save €3.02 on full tank (53L)</div>
+                                    </div>
+                                </div>
                                 <div class="phone-frame-overlay"></div>
                             </div>
                             <p class="screenshot-caption">Cheapest nearby</p>
                         </div>
+
+                        <!-- Phone 3: Station + price chart -->
                         <div class="screenshot-item reveal reveal-delay-2">
                             <div class="phone-frame">
-                                <img src="/assets/IMG_3307.PNG" alt="Station detail with price history chart">
+                                <div class="mock mock-phone-station">
+                                    <div class="mph-map-preview" aria-hidden="true">
+                                        <svg viewBox="0 0 200 80" preserveAspectRatio="xMidYMid slice">
+                                            <rect width="200" height="80" fill="#0e0a1e"/>
+                                            <path d="M0 50 Q50 30 100 45 Q150 60 200 40" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="12"/>
+                                            <path d="M30 80 Q50 50 70 40" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+                                            <text x="100" y="46" text-anchor="middle" font-size="14">⛽</text>
+                                        </svg>
+                                    </div>
+                                    <div class="mph-station-name">Carrefour Market</div>
+                                    <div class="mph-station-addr">40 Avenue Gabriel Péri, Montesson</div>
+                                    <div class="mph-prices">
+                                        <div class="mph-price-row"><span>SP98</span><span>€2.042/L</span></div>
+                                        <div class="mph-price-row"><span>SP95-E10</span><span>€1.919/L</span></div>
+                                        <div class="mph-price-row"><span>Gazole</span><span>€2.278/L</span></div>
+                                    </div>
+                                    <div class="mph-chart-label">Price History (30 days)</div>
+                                    <div class="mph-chart-chips">
+                                        <span class="mph-chart-chip mph-chart-chip-active">✓ SP95-E10</span>
+                                        <span class="mph-chart-chip">Gazole</span>
+                                        <span class="mph-chart-chip">SP98</span>
+                                    </div>
+                                    <svg class="mph-chart" viewBox="0 0 180 55" preserveAspectRatio="none" aria-hidden="true">
+                                        <defs>
+                                            <linearGradient id="mphFill" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#C840E9" stop-opacity="0.3"/>
+                                                <stop offset="100%" stop-color="#C840E9" stop-opacity="0"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <path d="M0 38 L20 36 L40 32 L60 28 L80 30 L100 26 L120 22 L140 20 L155 22 L165 28 L175 10 L180 45" fill="none" stroke="#C840E9" stroke-width="2" stroke-linecap="round"/>
+                                        <path d="M0 38 L20 36 L40 32 L60 28 L80 30 L100 26 L120 22 L140 20 L155 22 L165 28 L175 10 L180 45 L180 55 L0 55Z" fill="url(#mphFill)"/>
+                                        <line x1="0" y1="30" x2="180" y2="30" stroke="#4B6FFF" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+                                    </svg>
+                                </div>
                                 <div class="phone-frame-overlay"></div>
                             </div>
                             <p class="screenshot-caption">Station detail</p>
                         </div>
+
+                        <!-- Phone 4: Route feature -->
                         <div class="screenshot-item reveal reveal-delay-3">
                             <div class="phone-frame">
-                                <img src="/assets/IMG_3308.PNG" alt="My cars — saved vehicles with fuel type and range">
+                                <div class="mock mock-phone-route">
+                                    <div class="mph-header">
+                                        <span class="mph-back">‹</span>
+                                        <span class="mph-title">Cheapest on route</span>
+                                    </div>
+                                    <div class="mph-route-endpoints">
+                                        <div class="mph-route-from">
+                                            <span class="mph-route-dot mph-route-dot-from"></span>
+                                            <span>Le Mesnil-le-Roi</span>
+                                        </div>
+                                        <div class="mph-route-line-sep"></div>
+                                        <div class="mph-route-to">
+                                            <span class="mph-route-dot mph-route-dot-to"></span>
+                                            <span>Lyon, Part-Dieu</span>
+                                        </div>
+                                    </div>
+                                    <svg class="mph-route-vis" viewBox="0 0 180 140" aria-hidden="true">
+                                        <path d="M90 10 C90 10 70 35 72 60 C74 85 95 100 92 120 C89 135 90 145 90 145" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="14" stroke-linecap="round"/>
+                                        <path d="M90 10 C90 10 70 35 72 60 C74 85 95 100 92 120 C89 135 90 145 90 145" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" stroke-dasharray="5 7"/>
+                                        <circle cx="90" cy="10" r="5" fill="#4B6FFF"/>
+                                        <circle cx="90" cy="10" r="2.5" fill="white"/>
+                                        <circle cx="90" cy="145" r="5" fill="#C840E9"/>
+                                        <circle cx="90" cy="145" r="2.5" fill="white"/>
+                                        <!-- Station 1 -->
+                                        <g transform="translate(55,55)">
+                                            <rect x="-22" y="-12" width="44" height="24" rx="7" fill="#1e1535" stroke="rgba(139,79,255,0.6)" stroke-width="1"/>
+                                            <text x="0" y="5" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="9" fill="white">€1.905</text>
+                                        </g>
+                                        <!-- Station 2 best -->
+                                        <g transform="translate(122,98)">
+                                            <rect x="-28" y="-15" width="56" height="30" rx="8" fill="#8B4FFF"/>
+                                            <text x="0" y="-1" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="9" fill="white">€1.879</text>
+                                            <text x="0" y="10" text-anchor="middle" font-family="Manrope,sans-serif" font-size="7" fill="rgba(255,255,255,0.8)">Best · +0.8 min</text>
+                                        </g>
+                                    </svg>
+                                    <div class="mph-route-best-card">
+                                        <div class="mph-route-best-label">Recommended stop</div>
+                                        <div class="mph-route-best-row">
+                                            <div>
+                                                <div class="mph-result-name">Total Le Bréau</div>
+                                                <div class="mph-result-save">+0.8 min detour · Save €6.84</div>
+                                            </div>
+                                            <div class="mph-result-big-price mph-price-sm">€1.879<span>/L</span></div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="phone-frame-overlay"></div>
                             </div>
-                            <p class="screenshot-caption">My cars</p>
+                            <p class="screenshot-caption">On your route</p>
                         </div>
+
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- ─── Marquee ───────────────────────────────────────── -->
         <section class="marquee-section" aria-hidden="true">
             <div class="marquee-track">
                 <div class="marquee-content">
@@ -240,6 +577,7 @@
             </div>
         </section>
 
+        <!-- ─── Download ──────────────────────────────────────── -->
         <section class="download" id="download">
             <div class="download-bg">
                 <div class="download-orb download-orb-1"></div>
@@ -265,7 +603,35 @@
                     <div class="phone-shell phone-shell-sm">
                         <div class="phone-notch"></div>
                         <div class="phone-screen">
-                            <img src="/assets/IMG_3306.PNG" alt="Cheapest nearby screen" class="phone-img">
+                            <!-- Abstract cheapest nearby UI for download section -->
+                            <div class="mock mock-dl">
+                                <div class="mph-header">
+                                    <span class="mph-back">‹</span>
+                                    <span class="mph-title">Cheapest nearby</span>
+                                </div>
+                                <div class="mph-location-bar">📍 Your location</div>
+                                <div class="mph-find-btn">⛽ Find stations</div>
+                                <div class="mph-result mph-result-best">
+                                    <div class="mph-result-badge">Best value</div>
+                                    <div class="mph-result-name">Carrefour Market</div>
+                                    <div class="mph-result-big-price">€1.919<span>/L</span></div>
+                                    <div class="mph-result-meta">
+                                        <span class="mph-fuel-chip">SP95-E10</span>
+                                        <span class="mph-time-chip">⏱ 4.5 min</span>
+                                    </div>
+                                    <div class="mph-result-save">Save €2.28 on full tank</div>
+                                </div>
+                                <div class="mph-result">
+                                    <div class="mph-result-row">
+                                        <div class="mph-result-name">Carrefour</div>
+                                    </div>
+                                    <div class="mph-result-big-price mph-price-sm">€1.905<span>/L</span></div>
+                                    <div class="mph-result-meta">
+                                        <span class="mph-fuel-chip">SP95-E10</span>
+                                        <span class="mph-time-chip">⏱ 6.2 min</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="phone-glow phone-glow-sm"></div>
@@ -273,6 +639,7 @@
             </div>
         </section>
 
+        <!-- ─── Dashboard link ────────────────────────────────── -->
         <section class="dashboard-link">
             <div class="dashboard-link-inner reveal">
                 <div class="dashboard-link-copy">
