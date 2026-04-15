@@ -1,12 +1,17 @@
 :root {
-    --bg: #08111d;
-    --panel: rgba(10, 23, 38, 0.84);
-    --panel-border: rgba(255, 255, 255, 0.08);
-    --text: #f6f8fb;
-    --muted: #9db0c3;
-    --accent: #64d3ff;
-    --accent-warm: #ffbf47;
-    --shadow: 0 24px 60px rgba(1, 7, 16, 0.45);
+    --brand-blue: #4B6FFF;
+    --brand-violet: #8B4FFF;
+    --brand-magenta: #C840E9;
+    --brand-gradient: linear-gradient(135deg, #4B6FFF 0%, #8B4FFF 50%, #C840E9 100%);
+
+    --bg: #0a0814;
+    --panel: rgba(14, 10, 26, 0.88);
+    --panel-border: rgba(139, 79, 255, 0.14);
+    --text: #f2eeff;
+    --muted: #9b90b8;
+    --accent: #9B6FFF;
+    --accent-warm: #e87dff;
+    --shadow: 0 24px 60px rgba(4, 2, 12, 0.60);
 }
 
 * {
@@ -19,9 +24,9 @@ body {
     color: var(--text);
     font-family: "Manrope", sans-serif;
     background:
-        radial-gradient(circle at top left, rgba(100, 211, 255, 0.16), transparent 30%),
-        radial-gradient(circle at top right, rgba(255, 191, 71, 0.14), transparent 26%),
-        linear-gradient(180deg, #07111b 0%, #091827 52%, #060d15 100%);
+        radial-gradient(ellipse 70% 45% at 0% 0%, rgba(75, 111, 255, 0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 8%, rgba(200, 64, 233, 0.16) 0%, transparent 50%),
+        linear-gradient(165deg, #0d0a1a 0%, #0a0814 50%, #07050f 100%);
 }
 
 .site-shell {
@@ -54,11 +59,26 @@ body {
 }
 
 .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     margin: 0 0 8px;
     font-size: 0.82rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--accent);
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+.hero-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
 }
 
 .hero-copy h1 {
@@ -100,8 +120,9 @@ body {
 }
 
 .button-primary {
-    background: linear-gradient(135deg, var(--accent) 0%, #8de3ff 100%);
-    color: #06111a;
+    background: var(--brand-gradient);
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .button-secondary {
@@ -125,8 +146,9 @@ body {
     margin-bottom: 12px;
     padding: 8px 12px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--accent-warm);
+    background: rgba(139, 79, 255, 0.16);
+    border: 1px solid rgba(139, 79, 255, 0.24);
+    color: #d8c8ff;
     font-size: 0.82rem;
     font-weight: 700;
     letter-spacing: 0.04em;
