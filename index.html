@@ -61,60 +61,42 @@
                         </a>
                     </div>
                 </div>
-                <div class="hero-phone-wrap reveal reveal-delay-1">
-                    <div class="hero-phone">
-                        <div class="phone-shell">
-                            <div class="phone-notch"></div>
-                            <div class="phone-screen">
-                                <!-- Abstract home screen UI -->
-                                <div class="mock mock-home">
-                                    <div class="mock-home-header">
-                                        <div class="mock-home-logo">
-                                            <img src="/assets/logo.png" alt="" aria-hidden="true">
-                                        </div>
-                                        <span class="mock-home-title">Fuelwise</span>
-                                    </div>
-                                    <div class="mock-car-card">
-                                        <div class="mock-car-icon">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="10" width="22" height="7" rx="2"/><path d="M5 17v2a1 1 0 0 0 2 0v-2M17 17v2a1 1 0 0 0 2 0v-2"/><path d="M5 10l2-4h10l2 4"/></svg>
-                                        </div>
-                                        <div class="mock-car-info">
-                                            <span class="mock-car-name">Peugeot 3008</span>
-                                            <span class="mock-car-sub">53 L · SP95-E10</span>
-                                        </div>
-                                        <div class="mock-car-range">
-                                            <span class="mock-car-range-val">~412</span>
-                                            <span class="mock-car-range-unit">km</span>
-                                        </div>
-                                    </div>
-                                    <div class="mock-fav-label">Your favourite stations</div>
-                                    <div class="mock-station-card mock-station-fav">
-                                        <div class="mock-station-left">
-                                            <span class="mock-station-name">E. Leclerc</span>
-                                            <span class="mock-station-addr">Carrières-sur-Seine</span>
-                                        </div>
-                                        <div class="mock-station-right">
-                                            <span class="mock-station-price">€1.959<small>/L</small></span>
-                                            <svg class="mock-heart mock-heart-filled" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                                        </div>
-                                    </div>
-                                    <div class="mock-actions-label">Where to fill up?</div>
-                                    <div class="mock-action-btn mock-action-primary">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                                        Cheapest nearby
-                                    </div>
-                                    <div class="mock-action-btn mock-action-secondary">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-                                        Cheapest on route
-                                    </div>
-                                    <div class="mock-pref-row">
-                                        <div class="mock-pref-chip mock-pref-active">✓ Cheap</div>
-                                        <div class="mock-pref-chip">⏱ Fast</div>
-                                    </div>
-                                </div>
+                <div class="hero-cards-wrap reveal reveal-delay-1" aria-hidden="true">
+                    <div class="hero-card hero-card-station">
+                        <div class="hc-badge">Best value</div>
+                        <div class="hc-row">
+                            <div>
+                                <div class="hc-name">E. Leclerc</div>
+                                <div class="hc-sub">Carrières-sur-Seine · 2.1 km</div>
                             </div>
+                            <div class="hc-price">€1.919<span>/L</span></div>
                         </div>
-                        <div class="phone-glow"></div>
+                        <div class="hc-chips">
+                            <span class="hc-chip">SP95-E10</span>
+                            <span class="hc-chip hc-chip-time">⏱ 4.5 min</span>
+                        </div>
+                        <div class="hc-save">Save €2.28 on a full tank (53 L)</div>
+                    </div>
+                    <div class="hero-card hero-card-car">
+                        <div class="hc-car-row">
+                            <svg class="hc-car-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="10" width="22" height="7" rx="2"/><path d="M5 17v2a1 1 0 0 0 2 0v-2M17 17v2a1 1 0 0 0 2 0v-2"/><path d="M5 10l2-4h10l2 4"/></svg>
+                            <div>
+                                <div class="hc-name">Peugeot 3008</div>
+                                <div class="hc-sub">53 L · SP95-E10</div>
+                            </div>
+                            <div class="hc-range">~412 <span>km</span></div>
+                        </div>
+                        <div class="hc-range-track"><div class="hc-range-fill" style="width:74%"></div></div>
+                    </div>
+                    <div class="hero-card hero-card-actions">
+                        <div class="hc-action hc-action-primary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            Cheapest nearby
+                        </div>
+                        <div class="hc-action hc-action-secondary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                            Cheapest on route
+                        </div>
                     </div>
                 </div>
             </div>
@@ -370,176 +352,141 @@
                 <div class="screenshot-strip">
                     <div class="screenshot-track" id="screenshotTrack">
 
-                        <!-- Phone 1: Home -->
+                        <!-- Card 1: Home -->
                         <div class="screenshot-item reveal">
-                            <div class="phone-frame">
-                                <div class="mock mock-phone-home">
-                                    <div class="mph-header">
-                                        <div class="mph-logo"><img src="/assets/logo.png" alt="" aria-hidden="true"></div>
-                                        <span>Fuelwise</span>
+                            <div class="app-card">
+                                <div class="ac-label">Home</div>
+                                <div class="ac-car-row">
+                                    <svg class="ac-car-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="10" width="22" height="7" rx="2"/><path d="M5 17v2a1 1 0 0 0 2 0v-2M17 17v2a1 1 0 0 0 2 0v-2"/><path d="M5 10l2-4h10l2 4"/></svg>
+                                    <div>
+                                        <div class="ac-name">Peugeot 3008</div>
+                                        <div class="ac-sub">53 L · SP95-E10</div>
                                     </div>
-                                    <div class="mph-card">
-                                        <div class="mph-car-row">
-                                            <div class="mph-car-icon">🚗</div>
-                                            <div>
-                                                <div class="mph-car-name">Peugeot 3008</div>
-                                                <div class="mph-car-sub">53 L · SP95-E10</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mph-section-label">Favourite stations</div>
-                                    <div class="mph-fav-card">
-                                        <div>
-                                            <div class="mph-fav-name">E. Leclerc</div>
-                                            <div class="mph-fav-sub">Carrières-sur-Seine</div>
-                                        </div>
-                                        <div class="mph-fav-price">€1.959<span>/L</span></div>
-                                    </div>
-                                    <div class="mph-section-label" style="margin-top:10px">Where to fill up?</div>
-                                    <div class="mph-btn mph-btn-primary">⛽ Cheapest nearby</div>
-                                    <div class="mph-btn mph-btn-secondary">▶ Cheapest on route</div>
-                                    <div class="mph-chips">
-                                        <div class="mph-chip mph-chip-active">✓ Cheap</div>
-                                        <div class="mph-chip">⏱ Fast</div>
-                                    </div>
+                                    <div class="ac-range">~412 <span>km</span></div>
                                 </div>
-                                <div class="phone-frame-overlay"></div>
+                                <div class="ac-divider"></div>
+                                <div class="ac-section-label">Favourite stations</div>
+                                <div class="ac-fav-row">
+                                    <div>
+                                        <div class="ac-name">E. Leclerc</div>
+                                        <div class="ac-sub">Carrières-sur-Seine</div>
+                                    </div>
+                                    <div class="ac-price">€1.959<span>/L</span></div>
+                                </div>
+                                <div class="ac-divider"></div>
+                                <div class="ac-btn ac-btn-primary">⛽ Cheapest nearby</div>
+                                <div class="ac-btn ac-btn-secondary">▶ Cheapest on route</div>
                             </div>
                             <p class="screenshot-caption">Home</p>
                         </div>
 
-                        <!-- Phone 2: Cheapest nearby -->
+                        <!-- Card 2: Cheapest nearby -->
                         <div class="screenshot-item reveal reveal-delay-1">
-                            <div class="phone-frame">
-                                <div class="mock mock-phone-nearby">
-                                    <div class="mph-header">
-                                        <span class="mph-back">‹</span>
-                                        <span class="mph-title">Cheapest nearby</span>
+                            <div class="app-card">
+                                <div class="ac-label">Cheapest nearby</div>
+                                <div class="ac-location">📍 Le Mesnil-le-Roi</div>
+                                <div class="ac-result-card ac-result-best">
+                                    <div class="ac-best-badge">Best value</div>
+                                    <div class="ac-result-row">
+                                        <div class="ac-name">Carrefour Market</div>
+                                        <div class="ac-price">€1.919<span>/L</span></div>
                                     </div>
-                                    <div class="mph-location-bar">📍 Le Mesnil-le-Roi</div>
-                                    <div class="mph-find-btn">⛽ Find stations</div>
-                                    <div class="mph-result mph-result-best">
-                                        <div class="mph-result-badge">Best value</div>
-                                        <div class="mph-result-row">
-                                            <div class="mph-result-name">Carrefour Market</div>
-                                            <svg class="mph-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l7.78-7.78a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                                        </div>
-                                        <div class="mph-result-big-price">€1.919<span>/L</span></div>
-                                        <div class="mph-result-meta">
-                                            <span class="mph-fuel-chip">SP95-E10</span>
-                                            <span class="mph-time-chip">⏱ 4.5 min</span>
-                                        </div>
-                                        <div class="mph-result-save">Save €2.28 on full tank (53L)</div>
+                                    <div class="ac-chips">
+                                        <span class="ac-chip">SP95-E10</span>
+                                        <span class="ac-chip ac-chip-time">⏱ 4.5 min</span>
                                     </div>
-                                    <div class="mph-result">
-                                        <div class="mph-result-row">
-                                            <div class="mph-result-name">Carrefour</div>
-                                        </div>
-                                        <div class="mph-result-big-price mph-price-sm">€1.905<span>/L</span></div>
-                                        <div class="mph-result-meta">
-                                            <span class="mph-fuel-chip">SP95-E10</span>
-                                            <span class="mph-time-chip">⏱ 6.2 min</span>
-                                        </div>
-                                        <div class="mph-result-save">Save €3.02 on full tank (53L)</div>
-                                    </div>
+                                    <div class="ac-save">Save €2.28 on full tank (53L)</div>
                                 </div>
-                                <div class="phone-frame-overlay"></div>
+                                <div class="ac-result-card">
+                                    <div class="ac-result-row">
+                                        <div class="ac-name">Carrefour</div>
+                                        <div class="ac-price ac-price-sm">€1.905<span>/L</span></div>
+                                    </div>
+                                    <div class="ac-chips">
+                                        <span class="ac-chip">SP95-E10</span>
+                                        <span class="ac-chip ac-chip-time">⏱ 6.2 min</span>
+                                    </div>
+                                    <div class="ac-save">Save €3.02 on full tank (53L)</div>
+                                </div>
                             </div>
                             <p class="screenshot-caption">Cheapest nearby</p>
                         </div>
 
-                        <!-- Phone 3: Station + price chart -->
+                        <!-- Card 3: Station detail -->
                         <div class="screenshot-item reveal reveal-delay-2">
-                            <div class="phone-frame">
-                                <div class="mock mock-phone-station">
-                                    <div class="mph-map-preview" aria-hidden="true">
-                                        <svg viewBox="0 0 200 80" preserveAspectRatio="xMidYMid slice">
-                                            <rect width="200" height="80" fill="#0e0a1e"/>
-                                            <path d="M0 50 Q50 30 100 45 Q150 60 200 40" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="12"/>
-                                            <path d="M30 80 Q50 50 70 40" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
-                                            <text x="100" y="46" text-anchor="middle" font-size="14">⛽</text>
-                                        </svg>
-                                    </div>
-                                    <div class="mph-station-name">Carrefour Market</div>
-                                    <div class="mph-station-addr">40 Avenue Gabriel Péri, Montesson</div>
-                                    <div class="mph-prices">
-                                        <div class="mph-price-row"><span>SP98</span><span>€2.042/L</span></div>
-                                        <div class="mph-price-row"><span>SP95-E10</span><span>€1.919/L</span></div>
-                                        <div class="mph-price-row"><span>Gazole</span><span>€2.278/L</span></div>
-                                    </div>
-                                    <div class="mph-chart-label">Price History (30 days)</div>
-                                    <div class="mph-chart-chips">
-                                        <span class="mph-chart-chip mph-chart-chip-active">✓ SP95-E10</span>
-                                        <span class="mph-chart-chip">Gazole</span>
-                                        <span class="mph-chart-chip">SP98</span>
-                                    </div>
-                                    <svg class="mph-chart" viewBox="0 0 180 55" preserveAspectRatio="none" aria-hidden="true">
-                                        <defs>
-                                            <linearGradient id="mphFill" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="0%" stop-color="#C840E9" stop-opacity="0.3"/>
-                                                <stop offset="100%" stop-color="#C840E9" stop-opacity="0"/>
-                                            </linearGradient>
-                                        </defs>
-                                        <path d="M0 38 L20 36 L40 32 L60 28 L80 30 L100 26 L120 22 L140 20 L155 22 L165 28 L175 10 L180 45" fill="none" stroke="#C840E9" stroke-width="2" stroke-linecap="round"/>
-                                        <path d="M0 38 L20 36 L40 32 L60 28 L80 30 L100 26 L120 22 L140 20 L155 22 L165 28 L175 10 L180 45 L180 55 L0 55Z" fill="url(#mphFill)"/>
-                                        <line x1="0" y1="30" x2="180" y2="30" stroke="#4B6FFF" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
-                                    </svg>
+                            <div class="app-card">
+                                <div class="ac-label">Station detail</div>
+                                <div class="ac-name" style="font-size:0.95rem">Carrefour Market</div>
+                                <div class="ac-sub" style="margin-bottom:12px">40 Av. Gabriel Péri, Montesson</div>
+                                <div class="ac-prices">
+                                    <div class="ac-price-row"><span>SP98</span><span>€2.042<small>/L</small></span></div>
+                                    <div class="ac-price-row ac-price-row-hi"><span>SP95-E10</span><span>€1.919<small>/L</small></span></div>
+                                    <div class="ac-price-row"><span>Gazole</span><span>€2.278<small>/L</small></span></div>
                                 </div>
-                                <div class="phone-frame-overlay"></div>
+                                <div class="ac-divider"></div>
+                                <div class="ac-section-label">Price history · 30 days</div>
+                                <div class="ac-chips" style="margin-bottom:8px">
+                                    <span class="ac-chip ac-chip-active">✓ SP95-E10</span>
+                                    <span class="ac-chip">Gazole</span>
+                                    <span class="ac-chip">SP98</span>
+                                </div>
+                                <svg class="ac-sparkline" viewBox="0 0 200 52" preserveAspectRatio="none" aria-hidden="true">
+                                    <defs>
+                                        <linearGradient id="acFill" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#C840E9" stop-opacity="0.28"/>
+                                            <stop offset="100%" stop-color="#C840E9" stop-opacity="0"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0 36 L22 34 L44 30 L66 26 L88 28 L110 24 L132 20 L154 18 L168 20 L180 10 L200 42" fill="none" stroke="#C840E9" stroke-width="2" stroke-linecap="round"/>
+                                    <path d="M0 36 L22 34 L44 30 L66 26 L88 28 L110 24 L132 20 L154 18 L168 20 L180 10 L200 42 L200 52 L0 52Z" fill="url(#acFill)"/>
+                                    <line x1="0" y1="28" x2="200" y2="28" stroke="#4B6FFF" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+                                </svg>
                             </div>
                             <p class="screenshot-caption">Station detail</p>
                         </div>
 
-                        <!-- Phone 4: Route feature -->
+                        <!-- Card 4: Route -->
                         <div class="screenshot-item reveal reveal-delay-3">
-                            <div class="phone-frame">
-                                <div class="mock mock-phone-route">
-                                    <div class="mph-header">
-                                        <span class="mph-back">‹</span>
-                                        <span class="mph-title">Cheapest on route</span>
+                            <div class="app-card">
+                                <div class="ac-label">Cheapest on route</div>
+                                <div class="ac-route-endpoints">
+                                    <div class="ac-route-row">
+                                        <span class="ac-route-dot" style="background:#4B6FFF"></span>
+                                        <span class="ac-sub">Le Mesnil-le-Roi</span>
                                     </div>
-                                    <div class="mph-route-endpoints">
-                                        <div class="mph-route-from">
-                                            <span class="mph-route-dot mph-route-dot-from"></span>
-                                            <span>Le Mesnil-le-Roi</span>
-                                        </div>
-                                        <div class="mph-route-line-sep"></div>
-                                        <div class="mph-route-to">
-                                            <span class="mph-route-dot mph-route-dot-to"></span>
-                                            <span>Lyon, Part-Dieu</span>
-                                        </div>
-                                    </div>
-                                    <svg class="mph-route-vis" viewBox="0 0 180 140" aria-hidden="true">
-                                        <path d="M90 10 C90 10 70 35 72 60 C74 85 95 100 92 120 C89 135 90 145 90 145" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="14" stroke-linecap="round"/>
-                                        <path d="M90 10 C90 10 70 35 72 60 C74 85 95 100 92 120 C89 135 90 145 90 145" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" stroke-dasharray="5 7"/>
-                                        <circle cx="90" cy="10" r="5" fill="#4B6FFF"/>
-                                        <circle cx="90" cy="10" r="2.5" fill="white"/>
-                                        <circle cx="90" cy="145" r="5" fill="#C840E9"/>
-                                        <circle cx="90" cy="145" r="2.5" fill="white"/>
-                                        <!-- Station 1 -->
-                                        <g transform="translate(55,55)">
-                                            <rect x="-22" y="-12" width="44" height="24" rx="7" fill="#1e1535" stroke="rgba(139,79,255,0.6)" stroke-width="1"/>
-                                            <text x="0" y="5" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="9" fill="white">€1.905</text>
-                                        </g>
-                                        <!-- Station 2 best -->
-                                        <g transform="translate(122,98)">
-                                            <rect x="-28" y="-15" width="56" height="30" rx="8" fill="#8B4FFF"/>
-                                            <text x="0" y="-1" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="9" fill="white">€1.879</text>
-                                            <text x="0" y="10" text-anchor="middle" font-family="Manrope,sans-serif" font-size="7" fill="rgba(255,255,255,0.8)">Best · +0.8 min</text>
-                                        </g>
-                                    </svg>
-                                    <div class="mph-route-best-card">
-                                        <div class="mph-route-best-label">Recommended stop</div>
-                                        <div class="mph-route-best-row">
-                                            <div>
-                                                <div class="mph-result-name">Total Le Bréau</div>
-                                                <div class="mph-result-save">+0.8 min detour · Save €6.84</div>
-                                            </div>
-                                            <div class="mph-result-big-price mph-price-sm">€1.879<span>/L</span></div>
-                                        </div>
+                                    <div class="ac-route-line"></div>
+                                    <div class="ac-route-row">
+                                        <span class="ac-route-dot" style="background:#C840E9"></span>
+                                        <span class="ac-sub">Lyon, Part-Dieu</span>
                                     </div>
                                 </div>
-                                <div class="phone-frame-overlay"></div>
+                                <svg class="ac-route-map" viewBox="0 0 200 120" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                                    <path d="M100 8 C100 8 78 32 80 58 C82 84 104 96 101 112 C100 118 100 120 100 120" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="16" stroke-linecap="round"/>
+                                    <circle cx="100" cy="8" r="5" fill="#4B6FFF"/>
+                                    <circle cx="100" cy="8" r="2.5" fill="white"/>
+                                    <circle cx="100" cy="120" r="5" fill="#C840E9"/>
+                                    <circle cx="100" cy="120" r="2.5" fill="white"/>
+                                    <g transform="translate(65,48)">
+                                        <rect x="-22" y="-11" width="44" height="22" rx="6" fill="#1e1535" stroke="rgba(139,79,255,0.5)" stroke-width="1"/>
+                                        <text x="0" y="4" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="9" fill="white">€1.905</text>
+                                    </g>
+                                    <g transform="translate(138,82)">
+                                        <rect x="-26" y="-14" width="52" height="28" rx="7" fill="#4B6FFF"/>
+                                        <text x="0" y="-1" text-anchor="middle" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="9" fill="white">€1.879</text>
+                                        <text x="0" y="10" text-anchor="middle" font-family="Manrope,sans-serif" font-size="7" fill="rgba(255,255,255,0.8)">Best · +0.8 min</text>
+                                    </g>
+                                </svg>
+                                <div class="ac-divider"></div>
+                                <div class="ac-result-card ac-result-best" style="margin-top:0">
+                                    <div class="ac-best-badge">Recommended stop</div>
+                                    <div class="ac-result-row">
+                                        <div>
+                                            <div class="ac-name">Total Le Bréau</div>
+                                            <div class="ac-save">+0.8 min · Save €6.84</div>
+                                        </div>
+                                        <div class="ac-price ac-price-sm">€1.879<span>/L</span></div>
+                                    </div>
+                                </div>
                             </div>
                             <p class="screenshot-caption">On your route</p>
                         </div>
@@ -599,42 +546,44 @@
                     </div>
                     <p class="download-note">iOS 16.0 or later required</p>
                 </div>
-                <div class="download-phone reveal reveal-delay-1">
-                    <div class="phone-shell phone-shell-sm">
-                        <div class="phone-notch"></div>
-                        <div class="phone-screen">
-                            <!-- Abstract cheapest nearby UI for download section -->
-                            <div class="mock mock-dl">
-                                <div class="mph-header">
-                                    <span class="mph-back">‹</span>
-                                    <span class="mph-title">Cheapest nearby</span>
-                                </div>
-                                <div class="mph-location-bar">📍 Your location</div>
-                                <div class="mph-find-btn">⛽ Find stations</div>
-                                <div class="mph-result mph-result-best">
-                                    <div class="mph-result-badge">Best value</div>
-                                    <div class="mph-result-name">Carrefour Market</div>
-                                    <div class="mph-result-big-price">€1.919<span>/L</span></div>
-                                    <div class="mph-result-meta">
-                                        <span class="mph-fuel-chip">SP95-E10</span>
-                                        <span class="mph-time-chip">⏱ 4.5 min</span>
-                                    </div>
-                                    <div class="mph-result-save">Save €2.28 on full tank</div>
-                                </div>
-                                <div class="mph-result">
-                                    <div class="mph-result-row">
-                                        <div class="mph-result-name">Carrefour</div>
-                                    </div>
-                                    <div class="mph-result-big-price mph-price-sm">€1.905<span>/L</span></div>
-                                    <div class="mph-result-meta">
-                                        <span class="mph-fuel-chip">SP95-E10</span>
-                                        <span class="mph-time-chip">⏱ 6.2 min</span>
-                                    </div>
-                                </div>
+                <div class="download-cards reveal reveal-delay-1" aria-hidden="true">
+                    <div class="app-card app-card-dl">
+                        <div class="ac-label">Cheapest nearby</div>
+                        <div class="ac-location">📍 Your location</div>
+                        <div class="ac-result-card ac-result-best">
+                            <div class="ac-best-badge">Best value</div>
+                            <div class="ac-result-row">
+                                <div class="ac-name">Carrefour Market</div>
+                                <div class="ac-price">€1.919<span>/L</span></div>
+                            </div>
+                            <div class="ac-chips">
+                                <span class="ac-chip">SP95-E10</span>
+                                <span class="ac-chip ac-chip-time">⏱ 4.5 min</span>
+                            </div>
+                            <div class="ac-save">Save €2.28 on full tank</div>
+                        </div>
+                        <div class="ac-result-card">
+                            <div class="ac-result-row">
+                                <div class="ac-name">Carrefour</div>
+                                <div class="ac-price ac-price-sm">€1.905<span>/L</span></div>
+                            </div>
+                            <div class="ac-chips">
+                                <span class="ac-chip">SP95-E10</span>
+                                <span class="ac-chip ac-chip-time">⏱ 6.2 min</span>
                             </div>
                         </div>
                     </div>
-                    <div class="phone-glow phone-glow-sm"></div>
+                    <div class="app-card app-card-dl app-card-dl-2">
+                        <div class="ac-car-row">
+                            <svg class="ac-car-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="10" width="22" height="7" rx="2"/><path d="M5 17v2a1 1 0 0 0 2 0v-2M17 17v2a1 1 0 0 0 2 0v-2"/><path d="M5 10l2-4h10l2 4"/></svg>
+                            <div>
+                                <div class="ac-name">Peugeot 3008</div>
+                                <div class="ac-sub">53 L · SP95-E10</div>
+                            </div>
+                            <div class="ac-range">~412 <span>km</span></div>
+                        </div>
+                        <div class="hc-range-track"><div class="hc-range-fill" style="width:74%"></div></div>
+                    </div>
                 </div>
             </div>
         </section>
