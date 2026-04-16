@@ -1056,7 +1056,7 @@ img { display: block; max-width: 100%; }
     margin-bottom: 36px;
     max-width: 44ch;
 }
-.download-actions { margin-bottom: 16px; }
+.download-actions { margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 12px; }
 .store-btn {
     display: inline-flex;
     align-items: center;
